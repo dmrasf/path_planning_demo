@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class WaitShow extends StatefulWidget {
   final String _remindStr;
-  WaitShow(this._remindStr);
+  final bool _r;
+  WaitShow(this._remindStr, this._r);
   @override
   _WaitShowState createState() => _WaitShowState();
 }
@@ -28,6 +29,7 @@ class _WaitShowState extends State<WaitShow>
 
   @override
   Widget build(BuildContext context) {
+    if (!widget._r) _controller.stop();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

@@ -23,12 +23,15 @@ class ShowMapForAState extends State<ShowMapForA>
   List<dynamic> _openPoints = [];
   List<dynamic> _closePoints = [];
   List<int> _pathRoute = [];
+  String _remindStr = '正在读取地图';
+  bool _r = true;
+  int _speed = 500;
 
   @override
   void initState() {
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 60),
+      duration: Duration(minutes: 100),
     );
     getMapAnimation();
     super.initState();
@@ -57,24 +60,29 @@ class ShowMapForAState extends State<ShowMapForA>
               );
             },
           )
-        : WaitShow('正在读取地图');
+        : WaitShow(_remindStr, _r);
   }
 
   void getMapAnimation() async {
-    await calculateVisualPoint();
-    setState(() {
+    try {
+      File f = File(widget.fileName);
+      String mapStr = await f.readAsString();
+      _myMap = jsonDecode(mapStr);
+      String visualPointStr = await buildMap(widget.fileName);
+      Map<String, dynamic> tmpPoints = jsonDecode(visualPointStr);
+      _visualPoints = tmpPoints['visual_points'];
+      _visualGraph = tmpPoints['visual_graph'];
       _isDone = true;
-    });
+    } catch (e) {
+      await Future.delayed(Duration(seconds: 1));
+      _remindStr = '读取失败，请重新选择！';
+      _r = false;
+    }
+    setState(() {});
   }
 
-  Future<void> calculateVisualPoint() async {
-    File f = File(widget.fileName);
-    String mapStr = await f.readAsString();
-    _myMap = jsonDecode(mapStr);
-    String visualPointStr = await buildMap(widget.fileName);
-    Map<String, dynamic> tmpPoints = jsonDecode(visualPointStr);
-    _visualPoints = tmpPoints['visual_points'];
-    _visualGraph = tmpPoints['visual_graph'];
+  void changeSpeed(int newSpeed) {
+    _speed = newSpeed;
   }
 
   void run(double hWeight, double gWeight) async {
@@ -83,13 +91,14 @@ class ShowMapForAState extends State<ShowMapForA>
     _controller.forward();
     _openPoints = [];
     _closePoints = [];
+    _pathRoute = [];
     int start = 0;
     int end = _visualPoints.length - 1;
     List<int> currentPoint = [start, start];
     _closePoints.add(currentPoint);
     while (true) {
-      await Future.delayed(Duration(milliseconds: 100));
       _updateOpenPoints(currentPoint);
+      await Future.delayed(Duration(milliseconds: _speed));
       currentPoint = _findNextPoint(currentPoint, hWeight, gWeight);
       try {
         bool isBreak = false;
@@ -106,6 +115,7 @@ class ShowMapForAState extends State<ShowMapForA>
         return;
       }
       if (!_closePoints.contains(currentPoint)) _closePoints.add(currentPoint);
+      await Future.delayed(Duration(milliseconds: _speed));
       if (currentPoint[0] == end) break;
     }
     _closePoints.remove([start, start]);

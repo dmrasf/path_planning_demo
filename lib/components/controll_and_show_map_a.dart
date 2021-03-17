@@ -5,6 +5,7 @@ import 'package:path_planning/components/my_textfield.dart';
 import 'package:path_planning/components/show_map_a.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/toggle_button.dart';
+import 'package:path_planning/components/my_slider.dart';
 
 class ControllAndShowMapForA extends StatefulWidget {
   final String _fileName;
@@ -52,18 +53,35 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                   ),
                 ),
                 Spacer(),
-                MyTextField(this._controllerH, this._focusNodeH, 'H 权重'),
-                MyTextField(this._controllerG, this._focusNodeG, 'G 权重'),
+                MyTextField(
+                  this._controllerH,
+                  this._focusNodeH,
+                  'H 权重',
+                  'double',
+                  r'^\d+[\.\d]?\d*$',
+                ),
+                MyTextField(
+                  this._controllerG,
+                  this._focusNodeG,
+                  'G 权重',
+                  'double',
+                  r'^\d+[\.\d]?\d*$',
+                ),
                 Spacer(),
                 ShowPathDistance(key: showPathDiatance),
                 Spacer(),
+                MySlider('A*'),
                 OutlinedButton(
                   onPressed: () {
                     _focusNodeH.unfocus();
                     _focusNodeG.unfocus();
                     (showMapKey.currentState as ShowMapForAState).run(
-                      double.parse(_controllerH.text),
-                      double.parse(_controllerG.text),
+                      double.parse(
+                        _controllerH.text.isEmpty ? '1.0' : _controllerH.text,
+                      ),
+                      double.parse(
+                        _controllerG.text.isEmpty ? '1.0' : _controllerG.text,
+                      ),
                     );
                   },
                   child: Text(

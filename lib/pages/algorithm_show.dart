@@ -21,8 +21,8 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
         title: Text(widget.algorithmName),
         centerTitle: true,
       ),
-      //body: _fileName == null ? pickFileButton() : showMap(),
-      body: showMap(),
+      body: _fileName == null ? pickFileButton() : showMap(),
+      //body: showMap(),
     );
   }
 

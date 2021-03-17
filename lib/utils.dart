@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 
 final GlobalKey showMapKey = GlobalKey();
+final GlobalKey showMapKeyForAnt = GlobalKey();
 final GlobalKey showPathDiatance = GlobalKey();
 
 Future<String> pickFile(String extension) async {
