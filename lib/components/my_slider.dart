@@ -11,14 +11,14 @@ class MySlider extends StatefulWidget {
 }
 
 class _MySliderState extends State<MySlider> {
-  double _currentSliderValue = 500;
+  double _currentSliderValue = 830;
   @override
   Widget build(BuildContext context) {
     return Slider(
       value: _currentSliderValue,
-      min: 100,
+      min: 50,
       max: 2000,
-      divisions: 5,
+      divisions: 15,
       label: _currentSliderValue.toInt().toString() + ' ms',
       onChanged: (double newValue) {
         setState(() {

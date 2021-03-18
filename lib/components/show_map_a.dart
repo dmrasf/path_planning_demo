@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:path_planning/components/wait_show.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/utils.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -21,11 +22,14 @@ class ShowMapForAState extends State<ShowMapForA>
   List<dynamic> _visualPoints = [];
   List<dynamic> _visualGraph;
   List<dynamic> _openPoints = [];
+  List<double> _openPointsValue = [];
   List<dynamic> _closePoints = [];
   List<int> _pathRoute = [];
   String _remindStr = '正在读取地图';
   bool _r = true;
-  int _speed = 500;
+  int _speed = 830;
+  int _currentPoint = 0;
+  String _state = '';
 
   @override
   void initState() {
@@ -54,8 +58,11 @@ class ShowMapForAState extends State<ShowMapForA>
                   _myMap,
                   this._visualPoints,
                   this._openPoints,
+                  this._openPointsValue,
                   this._closePoints,
                   this._pathRoute,
+                  this._currentPoint,
+                  this._state,
                 ),
               );
             },
@@ -90,6 +97,7 @@ class ShowMapForAState extends State<ShowMapForA>
     _controller.reset();
     _controller.forward();
     _openPoints = [];
+    _openPointsValue = [];
     _closePoints = [];
     _pathRoute = [];
     int start = 0;
@@ -98,8 +106,10 @@ class ShowMapForAState extends State<ShowMapForA>
     _closePoints.add(currentPoint);
     while (true) {
       _updateOpenPoints(currentPoint);
-      await Future.delayed(Duration(milliseconds: _speed));
       currentPoint = _findNextPoint(currentPoint, hWeight, gWeight);
+      _state = 'Update Close Set';
+      _currentPoint = currentPoint[0];
+      await Future.delayed(Duration(milliseconds: _speed));
       try {
         bool isBreak = false;
         int i = 0;
@@ -111,13 +121,15 @@ class ShowMapForAState extends State<ShowMapForA>
         if (!isBreak) throw UnimplementedError();
         _openPoints.removeAt(i);
       } catch (e) {
-        // 需要提示
+        _state = 'Faile, No Path!';
         return;
       }
       if (!_closePoints.contains(currentPoint)) _closePoints.add(currentPoint);
+      _state = 'Update Open Set & Find Next Point';
       await Future.delayed(Duration(milliseconds: _speed));
       if (currentPoint[0] == end) break;
     }
+    _state = 'Success!';
     _closePoints.remove([start, start]);
     _parsePathRoute();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
@@ -149,30 +161,37 @@ class ShowMapForAState extends State<ShowMapForA>
     double hWeight,
     double gWeight,
   ) {
+    _openPointsValue = [];
     double minDistance = double.infinity;
     List<int> bestPoint = [];
     int end = _visualPoints.length - 1;
+    double grid = _myMap['grid'];
     for (int i = 0; i < _openPoints.length; i++) {
       List<int> tmpPoints = _openPoints[i];
       double h = pow(
-        pow(_visualPoints[end][0] - _visualPoints[tmpPoints[0]][0], 2) +
-            pow(_visualPoints[end][1] - _visualPoints[tmpPoints[0]][1], 2),
+        pow((_visualPoints[end][0] - _visualPoints[tmpPoints[0]][0]) * grid,
+                2) +
+            pow((_visualPoints[end][1] - _visualPoints[tmpPoints[0]][1]) * grid,
+                2),
         0.5,
       );
       double g = pow(
         pow(
-              _visualPoints[currentPoint[0]][0] -
-                  _visualPoints[tmpPoints[0]][0],
+              (_visualPoints[currentPoint[0]][0] -
+                      _visualPoints[tmpPoints[0]][0]) *
+                  grid,
               2,
             ) +
             pow(
-              _visualPoints[currentPoint[0]][1] -
-                  _visualPoints[tmpPoints[0]][1],
+              (_visualPoints[currentPoint[0]][1] -
+                      _visualPoints[tmpPoints[0]][1]) *
+                  grid,
               2,
             ),
         0.5,
       );
       double f = h * hWeight + g * gWeight;
+      _openPointsValue.add(f);
       if (f < minDistance) {
         minDistance = f;
         bestPoint.clear();
@@ -224,13 +243,19 @@ class MapPainterA extends CustomPainter {
   List<dynamic> _visualPoints;
   List<dynamic> _closePoints;
   List<dynamic> _openPoints;
+  List<double> _openPointsValue;
   List<int> _pathRoute;
+  int _currentPoint;
+  String _state;
   MapPainterA(
     this._myMap,
     this._visualPoints,
     this._openPoints,
+    this._openPointsValue,
     this._closePoints,
     this._pathRoute,
+    this._currentPoint,
+    this._state,
   );
   double _width;
   double _heigth;
@@ -251,6 +276,7 @@ class MapPainterA extends CustomPainter {
     drawBarriers(canvas, size, myPaint, k);
     drawRobot(canvas, size, myPaint, k);
     drawPath(canvas, size, myPaint, k);
+    drawState(canvas, size, myPaint, k);
   }
 
   @override
@@ -306,18 +332,35 @@ class MapPainterA extends CustomPainter {
         myPaint,
       );
     }
-
     for (int i = 0; i < _openPoints.length; i++) {
       myPaint..color = Colors.yellow;
-      canvas.drawCircle(
-        Offset(
-            _visualPoints[_openPoints[i][0]][1].toDouble() * k +
-                (size.width - k * (_width / _grid)) / 2,
-            _visualPoints[_openPoints[i][0]][0].toDouble() * k +
-                (size.height - k * (_heigth / _grid)) / 2),
-        _robotSize / (_grid + 0.035) * k,
-        myPaint,
+      Offset offset = Offset(
+        _visualPoints[_openPoints[i][0]][1].toDouble() * k +
+            (size.width - k * (_width / _grid)) / 2,
+        _visualPoints[_openPoints[i][0]][0].toDouble() * k +
+            (size.height - k * (_heigth / _grid)) / 2,
       );
+      canvas.drawCircle(offset, _robotSize / (_grid + 0.035) * k, myPaint);
+      if (_openPointsValue.isNotEmpty) {
+        double ma = _openPointsValue.reduce(max);
+        double mi = _openPointsValue.reduce(min);
+        double fontSize = k * (5 - 3 * (_openPointsValue[i] - mi) / (ma - mi));
+        TextSpan span = TextSpan(
+          text: _openPointsValue[i].toStringAsFixed(2),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+        TextPainter tp = TextPainter(
+          text: span,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr,
+        );
+        tp.layout();
+        tp.paint(canvas, offset + Offset(-fontSize, -fontSize * 0.6));
+      }
     }
     for (int i = 0; i < _closePoints.length; i++) {
       myPaint..color = Colors.blue;
@@ -348,5 +391,23 @@ class MapPainterA extends CustomPainter {
               (size.height - k * (_heigth / _grid)) / 2);
       canvas.drawLine(p1, p2, myPaint);
     }
+  }
+
+  void drawState(Canvas canvas, Size size, Paint myPaint, double k) {
+    TextSpan span = TextSpan(
+      text: _state,
+      style: TextStyle(
+        color: Colors.black,
+        fontSize: k * 10,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    TextPainter tp = TextPainter(
+      text: span,
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    tp.layout();
+    tp.paint(canvas, Offset.zero);
   }
 }

@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:path_planning/components/wait_show.dart';
-import 'package:path_planning/components/show_distance.dart';
-import 'package:path_planning/utils.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:path_planning/components/wait_show.dart';
+import 'package:path_planning/utils.dart';
 
 class ShowMapForAnt extends StatefulWidget {
   final String fileName;
@@ -20,7 +19,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   AnimationController _controller;
   String _remindStr = '正在读取地图';
   bool _r = true;
-  int _speed = 500;
+  int _speed = 830;
   List<dynamic> _visualPoints = [];
   List<dynamic> _visualGraph;
   List<List<double>> _pathPhermonone = [];
