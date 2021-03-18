@@ -19,7 +19,7 @@ class _MySliderState extends State<MySlider> {
       min: 100,
       max: 2000,
       divisions: 5,
-      label: 'speed',
+      label: _currentSliderValue.toInt().toString() + ' ms',
       onChanged: (double newValue) {
         setState(() {
           _currentSliderValue = newValue;
