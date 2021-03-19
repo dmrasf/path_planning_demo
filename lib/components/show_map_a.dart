@@ -25,6 +25,8 @@ class ShowMapForAState extends State<ShowMapForA>
   List<double> _openPointsValue = [];
   List<dynamic> _closePoints = [];
   List<int> _pathRoute = [];
+  List<int> _pathRouteOp = [];
+  bool _isShowOp = true;
   String _remindStr = '正在读取地图';
   bool _r = true;
   int _speed = 830;
@@ -61,6 +63,8 @@ class ShowMapForAState extends State<ShowMapForA>
                   this._openPointsValue,
                   this._closePoints,
                   this._pathRoute,
+                  this._pathRouteOp,
+                  this._isShowOp,
                   this._currentPoint,
                   this._state,
                 ),
@@ -100,6 +104,7 @@ class ShowMapForAState extends State<ShowMapForA>
     _openPointsValue = [];
     _closePoints = [];
     _pathRoute = [];
+    _pathRouteOp = [];
     int start = 0;
     int end = _visualPoints.length - 1;
     List<int> currentPoint = [start, start];
@@ -133,13 +138,38 @@ class ShowMapForAState extends State<ShowMapForA>
     _closePoints.remove([start, start]);
     _parsePathRoute();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
-      'Path distance: ' + calculatePathDistance().toStringAsFixed(2) + 'm',
+      'Path distance: ' + _calculatePathDistance().toStringAsFixed(2) + 'm',
     );
+    _optimisingPath();
     await Future.delayed(Duration(milliseconds: _speed));
     _controller.stop();
   }
 
-  double calculatePathDistance() {
+  void _optimisingPath() {
+    _pathRoute = _pathRoute.reversed.toList();
+    int currentPoint = _pathRoute[0];
+    List<int> necessaryPath = [currentPoint];
+    int i = 0;
+    int tmpi = 0;
+    int tmpPoint = 0;
+    while (true) {
+      tmpi = 0;
+      tmpPoint = 0;
+      for (int j = i + 1; j < _pathRoute.length; j++)
+        if (_visualGraph[currentPoint][_pathRoute[j]] != -1) {
+          tmpPoint = _pathRoute[j];
+          tmpi = j;
+        }
+      i = tmpi;
+      currentPoint = tmpPoint;
+      necessaryPath.add(currentPoint);
+      if (necessaryPath[necessaryPath.length - 1] == _visualPoints.length - 1)
+        break;
+    }
+    _pathRouteOp = necessaryPath;
+  }
+
+  double _calculatePathDistance() {
     double pathDistance = 0;
     for (int i = 0; i < _pathRoute.length - 1; i++) {
       pathDistance += pow(
@@ -241,14 +271,16 @@ class ShowMapForAState extends State<ShowMapForA>
 }
 
 class MapPainterA extends CustomPainter {
-  Map<String, dynamic> _myMap;
-  List<dynamic> _visualPoints;
-  List<dynamic> _closePoints;
-  List<dynamic> _openPoints;
-  List<double> _openPointsValue;
-  List<int> _pathRoute;
-  int _currentPoint;
-  String _state;
+  final Map<String, dynamic> _myMap;
+  final List<dynamic> _visualPoints;
+  final List<dynamic> _closePoints;
+  final List<dynamic> _openPoints;
+  final List<double> _openPointsValue;
+  final List<int> _pathRoute;
+  final int _currentPoint;
+  final String _state;
+  final List<int> _pathRouteOp;
+  final bool _isShowOp;
   MapPainterA(
     this._myMap,
     this._visualPoints,
@@ -256,6 +288,8 @@ class MapPainterA extends CustomPainter {
     this._openPointsValue,
     this._closePoints,
     this._pathRoute,
+    this._pathRouteOp,
+    this._isShowOp,
     this._currentPoint,
     this._state,
   );
@@ -276,8 +310,9 @@ class MapPainterA extends CustomPainter {
 
     Paint myPaint = Paint()..color = Colors.black;
     drawBarriers(canvas, size, myPaint, k);
-    drawRobot(canvas, size, myPaint, k);
     drawPath(canvas, size, myPaint, k);
+    if (_isShowOp) drawPathRouteOp(canvas, size, myPaint, k);
+    drawRobot(canvas, size, myPaint, k);
     drawState(canvas, size, myPaint, k);
   }
 
@@ -380,19 +415,82 @@ class MapPainterA extends CustomPainter {
 
   void drawPath(Canvas canvas, Size size, Paint myPaint, double k) {
     if (_pathRoute.isEmpty) return;
-    for (int i = 0; i < _pathRoute.length - 1; i++) {
+    myPaint
+      ..color = Colors.orange
+      ..strokeWidth = k;
+    for (int i = 0; i < _pathRoute.length; i++) {
       Offset p1 = Offset(
-          _visualPoints[_pathRoute[i]][1].toDouble() * k +
+          _visualPoints[_pathRouteOp[i]][1].toDouble() * k +
               (size.width - k * (_width / _grid)) / 2,
-          _visualPoints[_pathRoute[i]][0].toDouble() * k +
+          _visualPoints[_pathRouteOp[i]][0].toDouble() * k +
               (size.height - k * (_heigth / _grid)) / 2);
-      Offset p2 = Offset(
-          _visualPoints[_pathRoute[i + 1]][1].toDouble() * k +
-              (size.width - k * (_width / _grid)) / 2,
-          _visualPoints[_pathRoute[i + 1]][0].toDouble() * k +
-              (size.height - k * (_heigth / _grid)) / 2);
-      canvas.drawLine(p1, p2, myPaint);
+      if (i < _pathRouteOp.length - 1) {
+        Offset p2 = Offset(
+            _visualPoints[_pathRouteOp[i + 1]][1].toDouble() * k +
+                (size.width - k * (_width / _grid)) / 2,
+            _visualPoints[_pathRouteOp[i + 1]][0].toDouble() * k +
+                (size.height - k * (_heigth / _grid)) / 2);
+        canvas.drawLine(p1, p2, myPaint);
+      }
+      TextSpan span = TextSpan(
+        text: i.toString(),
+        style: TextStyle(
+          color: Colors.orange,
+          fontSize: k * 10,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+      TextPainter tp = TextPainter(
+        text: span,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      tp.layout();
+      tp.paint(canvas, p1);
     }
+  }
+
+  void drawPathRouteOp(Canvas canvas, Size size, Paint myPaint, double k) {
+    if (_pathRouteOp.isEmpty ||
+        _pathRouteOp[_pathRouteOp.length - 1] != _visualPoints.length - 1)
+      return;
+    Color color = myPaint.color;
+    myPaint
+      ..color = Colors.green
+      ..strokeWidth = k;
+    for (int i = 0; i < _pathRouteOp.length; i++) {
+      Offset p1 = Offset(
+              _visualPoints[_pathRouteOp[i]][1].toDouble() * k +
+                  (size.width - k * (_width / _grid)) / 2,
+              _visualPoints[_pathRouteOp[i]][0].toDouble() * k +
+                  (size.height - k * (_heigth / _grid)) / 2) +
+          Offset(2 * k, 2 * k);
+      if (i < _pathRouteOp.length - 1) {
+        Offset p2 = Offset(
+                _visualPoints[_pathRouteOp[i + 1]][1].toDouble() * k +
+                    (size.width - k * (_width / _grid)) / 2,
+                _visualPoints[_pathRouteOp[i + 1]][0].toDouble() * k +
+                    (size.height - k * (_heigth / _grid)) / 2) +
+            Offset(2 * k, 2 * k);
+        canvas.drawLine(p1, p2, myPaint);
+      }
+      TextSpan span = TextSpan(
+        text: i.toString(),
+        style: TextStyle(
+          color: Colors.green,
+          fontSize: k * 10,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+      TextPainter tp = TextPainter(
+        text: span,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      tp.layout();
+      tp.paint(canvas, p1);
+    }
+    myPaint..color = color;
   }
 
   void drawState(Canvas canvas, Size size, Paint myPaint, double k) {

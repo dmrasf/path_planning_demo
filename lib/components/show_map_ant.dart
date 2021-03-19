@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:path_planning/components/wait_show.dart';
+import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/utils.dart';
 
 class ShowMapForAnt extends StatefulWidget {
@@ -33,7 +34,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   List<List<int>> _antsPos = [];
   List<int> _pathRoute = [];
   List<int> _pathRouteOp = [];
-  bool _isShowOp = false;
+  bool _isShowOp = true;
   int _currentIter = 0;
 
   @override
@@ -134,9 +135,31 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       await _updatePathPhermonone();
     }
     _parseFinalRoute();
+    (showPathDiatance.currentState as ShowPathDistanceState).update(
+      'Path distance: ' + _calculatePathDistance().toStringAsFixed(2) + 'm',
+    );
     _optimisingPath();
     await Future.delayed(Duration(milliseconds: _speed));
     _controller.stop();
+  }
+
+  double _calculatePathDistance() {
+    double pathDistance = 0;
+    for (int i = 0; i < _pathRoute.length - 1; i++) {
+      pathDistance += pow(
+          pow(
+                  (_visualPoints[_pathRoute[i]][0] -
+                          _visualPoints[_pathRoute[i + 1]][0]) *
+                      _myMap['grid'],
+                  2) +
+              pow(
+                  (_visualPoints[_pathRoute[i]][1] -
+                          _visualPoints[_pathRoute[i + 1]][1]) *
+                      _myMap['grid'],
+                  2),
+          0.5);
+    }
+    return pathDistance;
   }
 
   void _parseFinalRoute() {
@@ -303,9 +326,9 @@ class MapPainterAnt extends CustomPainter {
     drawBarriers(canvas, size, myPaint, k);
     drawPath(canvas, size, myPaint, k);
     drawPathRoute(canvas, size, myPaint, k);
+    if (_isShowOp) drawPathRouteOp(canvas, size, myPaint, k);
     drawRobot(canvas, size, myPaint, k);
     drawState(canvas, size, myPaint, k);
-    if (_isShowOp) drawPathRouteOp(canvas, size, myPaint, k);
   }
 
   @override
@@ -452,14 +475,14 @@ class MapPainterAnt extends CustomPainter {
                   (size.width - k * (_width / _grid)) / 2,
               _visualPoints[_pathRouteOp[i]][0].toDouble() * k +
                   (size.height - k * (_heigth / _grid)) / 2) +
-          Offset(0, 40);
+          Offset(2 * k, 2 * k);
       if (i < _pathRouteOp.length - 1) {
         Offset p2 = Offset(
                 _visualPoints[_pathRouteOp[i + 1]][1].toDouble() * k +
                     (size.width - k * (_width / _grid)) / 2,
                 _visualPoints[_pathRouteOp[i + 1]][0].toDouble() * k +
                     (size.height - k * (_heigth / _grid)) / 2) +
-            Offset(0, 40);
+            Offset(2 * k, 2 * k);
         canvas.drawLine(p1, p2, myPaint);
       }
       TextSpan span = TextSpan(
