@@ -6,6 +6,7 @@ import 'package:path_planning/components/show_map_ant.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/toggle_button.dart';
 import 'package:path_planning/components/my_slider.dart';
+import 'package:path_planning/components/my_switch_button.dart';
 
 class ControllAndShowMapForAnt extends StatefulWidget {
   final String _fileName;
@@ -16,7 +17,7 @@ class ControllAndShowMapForAnt extends StatefulWidget {
 }
 
 class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
-  bool _isShow = true;
+  bool _isShow = false;
   TextEditingController _controllerAntsNum = TextEditingController();
   TextEditingController _controllerA = TextEditingController();
   TextEditingController _controllerB = TextEditingController();
@@ -127,6 +128,14 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                 ),
                 Spacer(),
                 ShowPathDistance(key: showPathDiatance),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('优化：'),
+                    MySwitchButton(false, 'Ants'),
+                  ],
+                ),
                 Spacer(),
                 MySlider('Ants'),
                 OutlinedButton(

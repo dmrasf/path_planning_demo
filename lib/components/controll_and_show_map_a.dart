@@ -6,6 +6,7 @@ import 'package:path_planning/components/show_map_a.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/toggle_button.dart';
 import 'package:path_planning/components/my_slider.dart';
+import 'package:path_planning/components/my_switch_button.dart';
 
 class ControllAndShowMapForA extends StatefulWidget {
   final String _fileName;
@@ -15,7 +16,7 @@ class ControllAndShowMapForA extends StatefulWidget {
 }
 
 class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
-  bool _isShow = true;
+  bool _isShow = false;
   TextEditingController _controllerH = TextEditingController();
   TextEditingController _controllerG = TextEditingController();
   FocusNode _focusNodeH = FocusNode();
@@ -69,6 +70,13 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                 ),
                 Spacer(),
                 ShowPathDistance(key: showPathDiatance),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('优化：'),
+                    MySwitchButton(false, 'A*'),
+                  ],
+                ),
                 Spacer(),
                 MySlider('A*'),
                 OutlinedButton(

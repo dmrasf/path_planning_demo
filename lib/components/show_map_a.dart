@@ -26,7 +26,7 @@ class ShowMapForAState extends State<ShowMapForA>
   List<dynamic> _closePoints = [];
   List<int> _pathRoute = [];
   List<int> _pathRouteOp = [];
-  bool _isShowOp = true;
+  bool _isShowOp = false;
   String _remindStr = '正在读取地图';
   bool _r = true;
   int _speed = 830;
@@ -96,6 +96,13 @@ class ShowMapForAState extends State<ShowMapForA>
     _speed = newSpeed;
   }
 
+  void toggleShowOp(bool isShow) {
+    _isShowOp = isShow;
+    (showPathDiatance.currentState as ShowPathDistanceState).update(
+      'Path distance: ' + _calculatePathDistance().toStringAsFixed(2) + 'm',
+    );
+  }
+
   void run(double hWeight, double gWeight) async {
     if (!_isDone) return;
     _controller.reset();
@@ -137,12 +144,10 @@ class ShowMapForAState extends State<ShowMapForA>
     _state = 'Success!';
     _closePoints.remove([start, start]);
     _parsePathRoute();
+    _optimisingPath();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       'Path distance: ' + _calculatePathDistance().toStringAsFixed(2) + 'm',
     );
-    _optimisingPath();
-    await Future.delayed(Duration(milliseconds: _speed));
-    _controller.stop();
   }
 
   void _optimisingPath() {
@@ -171,16 +176,19 @@ class ShowMapForAState extends State<ShowMapForA>
 
   double _calculatePathDistance() {
     double pathDistance = 0;
-    for (int i = 0; i < _pathRoute.length - 1; i++) {
+    List<int> tmp;
+    if (_isShowOp)
+      tmp = List.from(_pathRouteOp);
+    else
+      tmp = List.from(_pathRoute);
+    for (int i = 0; i < tmp.length - 1; i++) {
       pathDistance += pow(
           pow(
-                  (_visualPoints[_pathRoute[i]][0] -
-                          _visualPoints[_pathRoute[i + 1]][0]) *
+                  (_visualPoints[tmp[i]][0] - _visualPoints[tmp[i + 1]][0]) *
                       _myMap['grid'],
                   2) +
               pow(
-                  (_visualPoints[_pathRoute[i]][1] -
-                          _visualPoints[_pathRoute[i + 1]][1]) *
+                  (_visualPoints[tmp[i]][1] - _visualPoints[tmp[i + 1]][1]) *
                       _myMap['grid'],
                   2),
           0.5);
@@ -310,8 +318,10 @@ class MapPainterA extends CustomPainter {
 
     Paint myPaint = Paint()..color = Colors.black;
     drawBarriers(canvas, size, myPaint, k);
-    drawPath(canvas, size, myPaint, k);
-    if (_isShowOp) drawPathRouteOp(canvas, size, myPaint, k);
+    if (_isShowOp)
+      drawPathRouteOp(canvas, size, myPaint, k);
+    else
+      drawPath(canvas, size, myPaint, k);
     drawRobot(canvas, size, myPaint, k);
     drawState(canvas, size, myPaint, k);
   }
@@ -460,18 +470,16 @@ class MapPainterA extends CustomPainter {
       ..strokeWidth = k;
     for (int i = 0; i < _pathRouteOp.length; i++) {
       Offset p1 = Offset(
-              _visualPoints[_pathRouteOp[i]][1].toDouble() * k +
-                  (size.width - k * (_width / _grid)) / 2,
-              _visualPoints[_pathRouteOp[i]][0].toDouble() * k +
-                  (size.height - k * (_heigth / _grid)) / 2) +
-          Offset(2 * k, 2 * k);
+          _visualPoints[_pathRouteOp[i]][1].toDouble() * k +
+              (size.width - k * (_width / _grid)) / 2,
+          _visualPoints[_pathRouteOp[i]][0].toDouble() * k +
+              (size.height - k * (_heigth / _grid)) / 2);
       if (i < _pathRouteOp.length - 1) {
         Offset p2 = Offset(
-                _visualPoints[_pathRouteOp[i + 1]][1].toDouble() * k +
-                    (size.width - k * (_width / _grid)) / 2,
-                _visualPoints[_pathRouteOp[i + 1]][0].toDouble() * k +
-                    (size.height - k * (_heigth / _grid)) / 2) +
-            Offset(2 * k, 2 * k);
+            _visualPoints[_pathRouteOp[i + 1]][1].toDouble() * k +
+                (size.width - k * (_width / _grid)) / 2,
+            _visualPoints[_pathRouteOp[i + 1]][0].toDouble() * k +
+                (size.height - k * (_heigth / _grid)) / 2);
         canvas.drawLine(p1, p2, myPaint);
       }
       TextSpan span = TextSpan(

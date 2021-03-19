@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:path_planning/utils.dart';
 import 'package:path_planning/components/controll_and_show_map_a.dart';
 import 'package:path_planning/components/controll_and_show_map_ant.dart';
+import 'package:toast/toast.dart';
 
 class AlgorithmShow extends StatefulWidget {
   final String algorithmName;
@@ -20,6 +21,22 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
       appBar: AppBar(
         title: Text(widget.algorithmName),
         centerTitle: true,
+        actions: [
+          TextButton(
+            onPressed: () {
+              Toast.show(
+                "Toast plugin app",
+                context,
+                duration: Toast.LENGTH_SHORT,
+                gravity: Toast.TOP,
+              );
+            },
+            child: Icon(Icons.help),
+            style: ButtonStyle(
+              foregroundColor: MaterialStateProperty.all(Colors.black),
+            ),
+          ),
+        ],
       ),
       body: _fileName == null ? pickFileButton() : showMap(),
       //body: showMap(),
