@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_planning/components/algorithm_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -11,8 +12,27 @@ class HomePage extends StatelessWidget {
       width: double.infinity,
       alignment: Alignment.center,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Tooltip(
+                message: '退出',
+                child: TextButton(
+                  onPressed: () {
+                    SystemNavigator.pop();
+                  },
+                  child: Icon(Icons.exit_to_app_rounded),
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all(Colors.black),
+                    padding:
+                        MaterialStateProperty.all(EdgeInsets.only(top: 30)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Spacer(),
           Text(
             'Path Planning',
             style: GoogleFonts.lato(
@@ -23,6 +43,7 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
+          Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -30,6 +51,7 @@ class HomePage extends StatelessWidget {
               AlgorithmCard('Ants'),
             ],
           ),
+          Spacer(),
         ],
       ),
     );
