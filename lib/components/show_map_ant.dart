@@ -380,7 +380,7 @@ class MapPainterAnt extends CustomPainter {
       if (i == 0 || i == _visualPoints.length - 1)
         myPaint..color = Colors.red;
       else
-        myPaint..color = Colors.black;
+        myPaint..color = Color(0x5f000000);
       canvas.drawCircle(
         Offset(
             _visualPoints[i][1].toDouble() * k +
