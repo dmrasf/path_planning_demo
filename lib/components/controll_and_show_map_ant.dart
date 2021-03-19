@@ -34,6 +34,13 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
 
   @override
   void initState() {
+    _controllerAntsNum.text = "10";
+    _controllerA.text = "1";
+    _controllerB.text = "0.2";
+    _controllerP.text = "0.8";
+    _controllerAntPheromone.text = "50";
+    _controllerInitPathPheromone.text = "1";
+    _controllerIteration.text = "20";
     super.initState();
   }
 
@@ -92,7 +99,7 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                         _focusNodeP,
                         '挥发率',
                         '(0, 1)',
-                        r'0\.[1-9]\d*',
+                        r'^\d+[\.\d]?\d*$',
                       ),
                       MyTextField(
                         _controllerAntPheromone,
@@ -131,7 +138,37 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                     _focusNodeB.unfocus();
                     _focusNodeA.unfocus();
                     _focusNodeAntsNum.unfocus();
-                    (showMapKeyForAnt.currentState as ShowMapForAntState).run();
+                    (showMapKeyForAnt.currentState as ShowMapForAntState).run(
+                      int.parse(
+                        _controllerAntsNum.text.isEmpty
+                            ? '10'
+                            : _controllerAntsNum.text,
+                      ),
+                      double.parse(
+                        _controllerA.text.isEmpty ? '1.0' : _controllerA.text,
+                      ),
+                      double.parse(
+                        _controllerB.text.isEmpty ? '0.2' : _controllerB.text,
+                      ),
+                      double.parse(
+                        _controllerP.text.isEmpty ? '0.8' : _controllerP.text,
+                      ),
+                      double.parse(
+                        _controllerAntPheromone.text.isEmpty
+                            ? '50'
+                            : _controllerAntPheromone.text,
+                      ),
+                      double.parse(
+                        _controllerInitPathPheromone.text.isEmpty
+                            ? '1.0'
+                            : _controllerInitPathPheromone.text,
+                      ),
+                      int.parse(
+                        _controllerIteration.text.isEmpty
+                            ? '20'
+                            : _controllerIteration.text,
+                      ),
+                    );
                   },
                   child: Text(
                     'START',

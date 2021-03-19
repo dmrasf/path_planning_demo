@@ -135,6 +135,8 @@ class ShowMapForAState extends State<ShowMapForA>
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       'Path distance: ' + calculatePathDistance().toStringAsFixed(2) + 'm',
     );
+    await Future.delayed(Duration(milliseconds: _speed));
+    _controller.stop();
   }
 
   double calculatePathDistance() {
