@@ -20,10 +20,10 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   AnimationController _controller;
   String _remindStr = '正在读取地图';
   bool _r = true;
-  int _speed = 300;
   List<dynamic> _visualPoints = [];
   List<dynamic> _visualGraph;
   List<List<double>> _pathPhermonone = [];
+  int _speed = 300;
   double _initPathPhermononeValue = 1;
   int _iterationNum = 20;
   double _a = 1;
@@ -32,13 +32,15 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   double _antPheromone = 50;
   int _antsNum = 1;
   List<List<int>> _antsPos = [];
+  List<bool> _antsPosChange = [];
   List<int> _pathRoute = [];
   List<int> _pathRouteOp = [];
   bool _isShowOp = false;
   int _currentIter = 0;
   int _i = 0;
   int _anti = 1;
-  bool _isDispose = false;
+  bool _isShowAnts = false;
+  bool _isDisPose = false;
   Size _mapSize;
   double _grid;
   double _width;
@@ -66,7 +68,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   @override
   void dispose() {
     _controller.dispose();
-    _isDispose = true;
+    _isDisPose = true;
     super.dispose();
   }
 
@@ -75,6 +77,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     return _isDone
         ? GestureDetector(
             onTapDown: (details) {
+              // 显示信息素值
               double dx = details.localPosition.dx;
               double dy = details.localPosition.dy;
               for (int i = 0; i < _visualPoints.length - 1; i++) {
@@ -90,12 +93,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
                   double k1 = (p1W - dx) / (p1H - dy);
                   double k2 = (dx - p2W) / (dy - p2H);
                   return;
-                  if ((k1 - k2).abs() < 0.1 &&
-                      (p1W - dx) * (p2W - dx) < 0 &&
-                      (p1H - dy) * (p2H - dy) < 0) {
-                    print(_pathPhermonone[i][j]);
-                    return;
-                  }
                 }
               }
             },
@@ -114,6 +111,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
                     this._i,
                     this._antsPos,
                     this._anti,
+                    this._isShowAnts,
                   ),
                 );
               },
@@ -140,15 +138,19 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     setState(() {});
   }
 
-  void changeSpeed(int newSpeed) {
-    _speed = newSpeed;
-  }
-
   void toggleShowOp(bool isShow) {
     _isShowOp = isShow;
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       'Path distance: ' + _calculatePathDistance().toStringAsFixed(2) + 'm',
     );
+  }
+
+  void toggleShowAnts(bool isShow) {
+    _isShowAnts = isShow;
+  }
+
+  void changeSpeed(int newSpeed) {
+    _speed = newSpeed;
   }
 
   Future<void> run(
@@ -160,6 +162,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     double initAntPathPheromone,
     int iteration,
   ) async {
+    if (!_isDone) return;
     _antsNum = antsNum;
     _a = a;
     _b = b;
@@ -167,7 +170,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _antPheromone = antPheromone;
     _initPathPhermononeValue = initAntPathPheromone;
     _iterationNum = iteration;
-    if (!_isDone) return;
+    _currentIter = 0;
     _controller.reset();
     _controller.forward();
     _pathPhermonone = [];
@@ -176,17 +179,16 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _pathRouteOp = [];
     _currentIter = 0;
     _i = 0;
-    _anti = 1;
     _initPathPhermonone();
     for (int i = 0; i < _iterationNum; i++) {
-      _currentIter++;
-      _setAntsPosition();
-      while (true && !_isDispose) {
-        bool ll = await _selectNextPosForAnts();
-        if (ll) break;
+      if (_isDisPose) {
+        return;
       }
+      _currentIter = i + 1;
+      _setAntsPosition();
+      while (true) if (await _selectNextPosForAnts()) break;
       _updatePathPhermonone();
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(Duration(milliseconds: _speed));
     }
     _parseFinalRoute();
     _optimisingPath();
@@ -195,7 +197,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     );
     for (int i = 0; i < _pathRoute.length; i++) {
       _i = i;
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(Duration(milliseconds: 200));
     }
   }
 
@@ -263,7 +265,10 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   void _setAntsPosition() {
     _antsPos = [];
-    for (int i = 0; i < _antsNum; i++) _antsPos.add([0]);
+    for (int i = 0; i < _antsNum; i++) {
+      _antsPos.add([0]);
+      _antsPosChange.add(false);
+    }
   }
 
   double _calculateProbability(int p1, int p2) {
@@ -273,8 +278,12 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   Future<bool> _selectNextPosForAnts() async {
     bool isAllArrived = true;
+    ai = 0;
+    _anti = 1;
     for (List<int> antPath in _antsPos) {
-      if (antPath[antPath.length - 1] == _visualPoints.length - 1 ||
+      if (antPath[antPath.length - 1] == _visualPoints.length - 1)
+        antPath.add(-2);
+      if (antPath[antPath.length - 1] == -2 ||
           antPath[antPath.length - 1] == -1) continue;
       isAllArrived = false;
       List<int> pointToSelected = List.generate(
@@ -303,9 +312,8 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       }
       if (antPath.length > _anti) _anti = antPath.length;
     }
-    while (ai < 20) await Future.delayed(Duration(milliseconds: 0));
-    ai = 0;
-    _anti = 1;
+    while (ai < 20 && _isShowAnts)
+      await Future.delayed(Duration(milliseconds: 0));
     return isAllArrived;
   }
 
@@ -316,10 +324,10 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     for (List<int> antPath in _antsPos) {
       if (antPath[antPath.length - 1] != -1) {
         double path = 0;
-        for (int i = 0; i < antPath.length - 1; i++)
+        for (int i = 0; i < antPath.length - 2; i++)
           path += _visualGraph[antPath[i]][antPath[i + 1]];
         double deltaP = _antPheromone / path;
-        for (int i = 0; i < antPath.length - 1; i++) {
+        for (int i = 0; i < antPath.length - 2; i++) {
           _pathPhermonone[antPath[i]][antPath[i + 1]] += deltaP;
           _pathPhermonone[antPath[i + 1]][antPath[i]] =
               _pathPhermonone[antPath[i]][antPath[i + 1]];
@@ -365,7 +373,8 @@ class MapPainterAnt extends CustomPainter {
   final bool _isShowOp;
   final int _i;
   final List<List<int>> _antsPos;
-  final _anti;
+  final int _anti;
+  final bool _isShowAnts;
   MapPainterAnt(
     this._myMap,
     this._visualPoints,
@@ -377,6 +386,7 @@ class MapPainterAnt extends CustomPainter {
     this._i,
     this._antsPos,
     this._anti,
+    this._isShowAnts,
   );
   double _width;
   double _heigth;
@@ -409,7 +419,7 @@ class MapPainterAnt extends CustomPainter {
       drawPathRoute(canvas, size, myPaint, k);
     drawRobot(canvas, size, myPaint, k);
     drawState(canvas, size, myPaint, k);
-    drawAnts(canvas, size, myPaint, k);
+    if (_isShowAnts) drawAnts(canvas, size, myPaint, k);
   }
 
   @override
@@ -435,26 +445,24 @@ class MapPainterAnt extends CustomPainter {
                 (size.width - k * (_width / _grid)) / 2,
             _visualPoints[antPath[antPath.length - 2]][0].toDouble() * k +
                 (size.height - k * (_heigth / _grid)) / 2);
+      } else if (antPath[antPath.length - 1] == -2) {
+        p = Offset(
+            _visualPoints[antPath[antPath.length - 2]][1].toDouble() * k +
+                (size.width - k * (_width / _grid)) / 2,
+            _visualPoints[antPath[antPath.length - 2]][0].toDouble() * k +
+                (size.height - k * (_heigth / _grid)) / 2);
       } else {
-        if (_anti > antPath.length) {
-          p = Offset(
-              _visualPoints[antPath[antPath.length - 1]][1].toDouble() * k +
-                  (size.width - k * (_width / _grid)) / 2,
-              _visualPoints[antPath[antPath.length - 1]][0].toDouble() * k +
-                  (size.height - k * (_heigth / _grid)) / 2);
-        } else {
-          Offset p1 = Offset(
-              _visualPoints[antPath[_anti - 2]][1].toDouble() * k +
-                  (size.width - k * (_width / _grid)) / 2,
-              _visualPoints[antPath[_anti - 2]][0].toDouble() * k +
-                  (size.height - k * (_heigth / _grid)) / 2);
-          Offset p2 = Offset(
-              _visualPoints[antPath[_anti - 1]][1].toDouble() * k +
-                  (size.width - k * (_width / _grid)) / 2,
-              _visualPoints[antPath[_anti - 1]][0].toDouble() * k +
-                  (size.height - k * (_heigth / _grid)) / 2);
-          p = p1 + (p2 - p1) * ai.toDouble() / 20;
-        }
+        Offset p1 = Offset(
+            _visualPoints[antPath[antPath.length - 2]][1].toDouble() * k +
+                (size.width - k * (_width / _grid)) / 2,
+            _visualPoints[antPath[antPath.length - 2]][0].toDouble() * k +
+                (size.height - k * (_heigth / _grid)) / 2);
+        Offset p2 = Offset(
+            _visualPoints[antPath[antPath.length - 1]][1].toDouble() * k +
+                (size.width - k * (_width / _grid)) / 2,
+            _visualPoints[antPath[antPath.length - 1]][0].toDouble() * k +
+                (size.height - k * (_heigth / _grid)) / 2);
+        p = p1 + (p2 - p1) * ai.toDouble() / 20;
       }
       canvas.drawCircle(
         p + Offset(Random().nextDouble(), Random().nextDouble()) * 5,
@@ -551,7 +559,7 @@ class MapPainterAnt extends CustomPainter {
             _visualPoints[j][0].toDouble() * k +
                 (size.height - k * (_heigth / _grid)) / 2);
         double width =
-            (_pathPhermonone[i][j] - miP) / (mxP - miP) * 5.5 * k * mxP / 100;
+            (_pathPhermonone[i][j] - miP) / (mxP - miP) * 5.5 * k * mxP / 20;
         myPaint
           ..strokeWidth = width
           ..strokeCap = StrokeCap.round;

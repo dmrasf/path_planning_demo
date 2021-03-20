@@ -70,7 +70,7 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                 ),
                 Spacer(),
                 ShowPathDistance(key: showPathDiatance),
-                MySwitchButton(false, 'A*'),
+                MySwitchButton(false, 'A*', '过滤', 0),
                 Spacer(),
                 MySlider('A*'),
                 OutlinedButton(

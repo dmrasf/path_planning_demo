@@ -29,7 +29,6 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
                   right: 3,
                   child: Container(
                     width: 200,
-                    height: 250,
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(8),
                     child: Text(
