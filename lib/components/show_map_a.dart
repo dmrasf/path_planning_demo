@@ -30,7 +30,6 @@ class ShowMapForAState extends State<ShowMapForA>
   String _remindStr = '正在读取地图';
   bool _r = true;
   int _speed = 300;
-  int _currentPoint = 0;
   int _i;
   String _state = '';
   bool _isDisPose = false;
@@ -68,7 +67,6 @@ class ShowMapForAState extends State<ShowMapForA>
                   this._pathRoute,
                   this._pathRouteOp,
                   this._isShowOp,
-                  this._currentPoint,
                   this._state,
                   this._i,
                 ),
@@ -126,7 +124,6 @@ class ShowMapForAState extends State<ShowMapForA>
       _updateOpenPoints(currentPoint);
       currentPoint = _findNextPoint(currentPoint, hWeight, gWeight);
       _state = 'Update Close Set';
-      _currentPoint = currentPoint[0];
       await Future.delayed(Duration(milliseconds: _speed));
       try {
         bool isBreak = false;
@@ -295,7 +292,6 @@ class MapPainterA extends CustomPainter {
   final List<dynamic> _openPoints;
   final List<double> _openPointsValue;
   final List<int> _pathRoute;
-  final int _currentPoint;
   final String _state;
   final List<int> _pathRouteOp;
   final bool _isShowOp;
@@ -309,7 +305,6 @@ class MapPainterA extends CustomPainter {
     this._pathRoute,
     this._pathRouteOp,
     this._isShowOp,
-    this._currentPoint,
     this._state,
     this._i,
   );

@@ -28,24 +28,29 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
                   top: 60,
                   right: 3,
                   child: Container(
-                    width: 200,
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(8),
                     child: Text(
-                      'cdsc',
+                      widget.algorithmName == 'A*'
+                          ? 'H: to end\nG: to point'
+                          : 'a: \nb: \np: ',
                       style: GoogleFonts.jua(
                         textStyle: TextStyle(
+                          fontSize: 20,
                           color: Colors.black,
                           decoration: TextDecoration.none,
                         ),
                       ),
                     ),
-                    color: Colors.teal[100].withOpacity(0.8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.8),
+                      borderRadius: BorderRadius.all(Radius.circular(3.0)),
+                    ),
                   ),
                 );
               });
               Overlay.of(context).insert(entry);
-              await Future.delayed(Duration(milliseconds: 2000)).then(
+              await Future.delayed(Duration(milliseconds: 300)).then(
                 (value) => entry.remove(),
               );
             },
