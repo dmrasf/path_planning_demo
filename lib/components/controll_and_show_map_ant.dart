@@ -129,15 +129,9 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                 Spacer(),
                 ShowPathDistance(key: showPathDiatance),
                 SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('优化：'),
-                    MySwitchButton(false, 'Ants'),
-                  ],
-                ),
+                MySwitchButton(false, 'Ants'),
                 Spacer(),
-                MySlider('Ants'),
+                //MySlider('Ants'),
                 OutlinedButton(
                   onPressed: () {
                     _focusNodeIteration.unfocus();

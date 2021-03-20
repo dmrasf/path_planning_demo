@@ -70,13 +70,7 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                 ),
                 Spacer(),
                 ShowPathDistance(key: showPathDiatance),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('优化：'),
-                    MySwitchButton(false, 'A*'),
-                  ],
-                ),
+                MySwitchButton(false, 'A*'),
                 Spacer(),
                 MySlider('A*'),
                 OutlinedButton(

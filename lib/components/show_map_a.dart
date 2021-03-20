@@ -29,8 +29,9 @@ class ShowMapForAState extends State<ShowMapForA>
   bool _isShowOp = false;
   String _remindStr = '正在读取地图';
   bool _r = true;
-  int _speed = 830;
+  int _speed = 300;
   int _currentPoint = 0;
+  int _i;
   String _state = '';
 
   @override
@@ -67,6 +68,7 @@ class ShowMapForAState extends State<ShowMapForA>
                   this._isShowOp,
                   this._currentPoint,
                   this._state,
+                  this._i,
                 ),
               );
             },
@@ -112,6 +114,7 @@ class ShowMapForAState extends State<ShowMapForA>
     _closePoints = [];
     _pathRoute = [];
     _pathRouteOp = [];
+    _i = 0;
     int start = 0;
     int end = _visualPoints.length - 1;
     List<int> currentPoint = [start, start];
@@ -148,11 +151,15 @@ class ShowMapForAState extends State<ShowMapForA>
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       'Path distance: ' + _calculatePathDistance().toStringAsFixed(2) + 'm',
     );
+    for (int i = 0; i < _pathRoute.length; i++) {
+      _i = i;
+      await Future.delayed(Duration(milliseconds: 100));
+    }
   }
 
   void _optimisingPath() {
-    _pathRoute = _pathRoute.reversed.toList();
-    int currentPoint = _pathRoute[0];
+    List<int> tmpRoute = _pathRoute.reversed.toList();
+    int currentPoint = tmpRoute[0];
     List<int> necessaryPath = [currentPoint];
     int i = 0;
     int tmpi = 0;
@@ -160,9 +167,9 @@ class ShowMapForAState extends State<ShowMapForA>
     while (true) {
       tmpi = 0;
       tmpPoint = 0;
-      for (int j = i + 1; j < _pathRoute.length; j++)
-        if (_visualGraph[currentPoint][_pathRoute[j]] != -1) {
-          tmpPoint = _pathRoute[j];
+      for (int j = i + 1; j < tmpRoute.length; j++)
+        if (_visualGraph[currentPoint][tmpRoute[j]] != -1) {
+          tmpPoint = tmpRoute[j];
           tmpi = j;
         }
       i = tmpi;
@@ -289,6 +296,7 @@ class MapPainterA extends CustomPainter {
   final String _state;
   final List<int> _pathRouteOp;
   final bool _isShowOp;
+  final int _i;
   MapPainterA(
     this._myMap,
     this._visualPoints,
@@ -300,6 +308,7 @@ class MapPainterA extends CustomPainter {
     this._isShowOp,
     this._currentPoint,
     this._state,
+    this._i,
   );
   double _width;
   double _heigth;
@@ -423,38 +432,38 @@ class MapPainterA extends CustomPainter {
     }
   }
 
+  Offset getOffset(Size size, double k, int i, List<int> tmpPath) {
+    return Offset(
+        _visualPoints[tmpPath[i]][1].toDouble() * k +
+            (size.width - k * (_width / _grid)) / 2,
+        _visualPoints[tmpPath[i]][0].toDouble() * k +
+            (size.height - k * (_heigth / _grid)) / 2);
+  }
+
   void drawPath(Canvas canvas, Size size, Paint myPaint, double k) {
     if (_pathRoute.isEmpty) return;
     myPaint
       ..color = Colors.orange
       ..strokeWidth = k;
-    for (int i = 0; i < _pathRoute.length; i++) {
-      Offset p1 = Offset(
-          _visualPoints[_pathRouteOp[i]][1].toDouble() * k +
-              (size.width - k * (_width / _grid)) / 2,
-          _visualPoints[_pathRouteOp[i]][0].toDouble() * k +
-              (size.height - k * (_heigth / _grid)) / 2);
-      if (i < _pathRouteOp.length - 1) {
-        Offset p2 = Offset(
-            _visualPoints[_pathRouteOp[i + 1]][1].toDouble() * k +
-                (size.width - k * (_width / _grid)) / 2,
-            _visualPoints[_pathRouteOp[i + 1]][0].toDouble() * k +
-                (size.height - k * (_heigth / _grid)) / 2);
+    TextPainter tp = TextPainter(
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    for (int i = 0; i < _i + 1; i++) {
+      Offset p1 = getOffset(size, k, i, _pathRoute);
+      if (i < _pathRoute.length - 1) {
+        Offset p2 = getOffset(size, k, i + 1, _pathRoute);
         canvas.drawLine(p1, p2, myPaint);
       }
       TextSpan span = TextSpan(
-        text: i.toString(),
+        text: (_pathRoute.length - 1 - i).toString(),
         style: TextStyle(
           color: Colors.orange,
           fontSize: k * 10,
           fontWeight: FontWeight.bold,
         ),
       );
-      TextPainter tp = TextPainter(
-        text: span,
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
-      );
+      tp..text = span;
       tp.layout();
       tp.paint(canvas, p1);
     }
@@ -468,18 +477,14 @@ class MapPainterA extends CustomPainter {
     myPaint
       ..color = Colors.green
       ..strokeWidth = k;
+    TextPainter tp = TextPainter(
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
     for (int i = 0; i < _pathRouteOp.length; i++) {
-      Offset p1 = Offset(
-          _visualPoints[_pathRouteOp[i]][1].toDouble() * k +
-              (size.width - k * (_width / _grid)) / 2,
-          _visualPoints[_pathRouteOp[i]][0].toDouble() * k +
-              (size.height - k * (_heigth / _grid)) / 2);
+      Offset p1 = getOffset(size, k, i, _pathRouteOp);
       if (i < _pathRouteOp.length - 1) {
-        Offset p2 = Offset(
-            _visualPoints[_pathRouteOp[i + 1]][1].toDouble() * k +
-                (size.width - k * (_width / _grid)) / 2,
-            _visualPoints[_pathRouteOp[i + 1]][0].toDouble() * k +
-                (size.height - k * (_heigth / _grid)) / 2);
+        Offset p2 = getOffset(size, k, i + 1, _pathRouteOp);
         canvas.drawLine(p1, p2, myPaint);
       }
       TextSpan span = TextSpan(
@@ -490,11 +495,7 @@ class MapPainterA extends CustomPainter {
           fontWeight: FontWeight.bold,
         ),
       );
-      TextPainter tp = TextPainter(
-        text: span,
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
-      );
+      tp..text = span;
       tp.layout();
       tp.paint(canvas, p1);
     }

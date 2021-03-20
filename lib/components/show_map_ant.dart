@@ -20,7 +20,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   AnimationController _controller;
   String _remindStr = '正在读取地图';
   bool _r = true;
-  int _speed = 830;
+  int _speed = 300;
   List<dynamic> _visualPoints = [];
   List<dynamic> _visualGraph;
   List<List<double>> _pathPhermonone = [];
@@ -30,12 +30,15 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   double _b = 0.2;
   double _p = 0.8;
   double _antPheromone = 50;
-  int _antsNum = 40;
+  int _antsNum = 1;
   List<List<int>> _antsPos = [];
   List<int> _pathRoute = [];
   List<int> _pathRouteOp = [];
   bool _isShowOp = false;
   int _currentIter = 0;
+  int _i = 0;
+  int _anti = 1;
+  bool _isDispose = false;
 
   @override
   void initState() {
@@ -50,27 +53,36 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   @override
   void dispose() {
     _controller.dispose();
+    _isDispose = true;
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return _isDone
-        ? AnimatedBuilder(
-            animation: _controller,
-            builder: (_, __) {
-              return CustomPaint(
-                painter: MapPainterAnt(
-                  _myMap,
-                  this._visualPoints,
-                  this._pathPhermonone,
-                  this._currentIter,
-                  this._pathRoute,
-                  this._pathRouteOp,
-                  this._isShowOp,
-                ),
-              );
+        ? GestureDetector(
+            onTapDown: (details) {
+              print(details.localPosition);
             },
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (_, __) {
+                return CustomPaint(
+                  painter: MapPainterAnt(
+                    _myMap,
+                    this._visualPoints,
+                    this._pathPhermonone,
+                    this._currentIter,
+                    this._pathRoute,
+                    this._pathRouteOp,
+                    this._isShowOp,
+                    this._i,
+                    this._antsPos,
+                    this._anti,
+                  ),
+                );
+              },
+            ),
           )
         : WaitShow(_remindStr, _r);
   }
@@ -113,6 +125,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     double initAntPathPheromone,
     int iteration,
   ) async {
+    _antsNum = antsNum;
     _a = a;
     _b = b;
     _p = p;
@@ -127,21 +140,28 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _pathRoute = [];
     _pathRouteOp = [];
     _currentIter = 0;
+    _i = 0;
+    _anti = 1;
     _initPathPhermonone();
-    await Future.delayed(Duration(milliseconds: _speed * 2));
     for (int i = 0; i < _iterationNum; i++) {
       _currentIter++;
       _setAntsPosition();
-      while (true) {
-        if (_selectNextPosForAnts()) break;
+      while (true && !_isDispose) {
+        bool ll = await _selectNextPosForAnts();
+        if (ll) break;
       }
-      await _updatePathPhermonone();
+      _updatePathPhermonone();
+      await Future.delayed(Duration(milliseconds: 500));
     }
     _parseFinalRoute();
     _optimisingPath();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       'Path distance: ' + _calculatePathDistance().toStringAsFixed(2) + 'm',
     );
+    for (int i = 0; i < _pathRoute.length; i++) {
+      _i = i;
+      await Future.delayed(Duration(milliseconds: 100));
+    }
   }
 
   double _calculatePathDistance() {
@@ -207,6 +227,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   }
 
   void _setAntsPosition() {
+    _antsPos = [];
     for (int i = 0; i < _antsNum; i++) _antsPos.add([0]);
   }
 
@@ -215,7 +236,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     return pow(_pathPhermonone[p1][p2], _a) * pow(1 / _visualGraph[p1][p2], _b);
   }
 
-  bool _selectNextPosForAnts() {
+  Future<bool> _selectNextPosForAnts() async {
     bool isAllArrived = true;
     for (List<int> antPath in _antsPos) {
       if (antPath[antPath.length - 1] == _visualPoints.length - 1 ||
@@ -245,11 +266,15 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       } catch (e) {
         antPath.add(-1);
       }
+      if (antPath.length > _anti) _anti = antPath.length;
     }
+    while (ai < 20) await Future.delayed(Duration(milliseconds: 0));
+    ai = 0;
+    _anti = 1;
     return isAllArrived;
   }
 
-  Future<void> _updatePathPhermonone() async {
+  void _updatePathPhermonone() {
     for (int i = 0; i < _visualPoints.length; i++)
       for (int j = 0; j < _visualPoints.length; j++)
         _pathPhermonone[i][j] *= (1 - _p);
@@ -266,7 +291,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
         }
       }
     }
-    await Future.delayed(Duration(milliseconds: _speed * 2));
   }
 
   void _optimisingPath() {
@@ -294,6 +318,8 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   }
 }
 
+int ai = 0;
+
 class MapPainterAnt extends CustomPainter {
   final Map<String, dynamic> _myMap;
   final List<dynamic> _visualPoints;
@@ -302,6 +328,9 @@ class MapPainterAnt extends CustomPainter {
   final List<int> _pathRoute;
   final List<int> _pathRouteOp;
   final bool _isShowOp;
+  final int _i;
+  final List<List<int>> _antsPos;
+  final _anti;
   MapPainterAnt(
     this._myMap,
     this._visualPoints,
@@ -310,6 +339,9 @@ class MapPainterAnt extends CustomPainter {
     this._pathRoute,
     this._pathRouteOp,
     this._isShowOp,
+    this._i,
+    this._antsPos,
+    this._anti,
   );
   double _width;
   double _heigth;
@@ -319,7 +351,6 @@ class MapPainterAnt extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!parseData()) return;
     if (!parseData()) return;
     double gridWidth = _width / _grid;
     double gridHeigth = _heigth / _grid;
@@ -336,11 +367,70 @@ class MapPainterAnt extends CustomPainter {
       drawPathRoute(canvas, size, myPaint, k);
     drawRobot(canvas, size, myPaint, k);
     drawState(canvas, size, myPaint, k);
+    drawAnts(canvas, size, myPaint, k);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
+  }
+
+  void drawAnts(Canvas canvas, Size size, Paint myPaint, double k) {
+    if (_anti < 2) {
+      ai = 20;
+      return;
+    }
+    myPaint..color = Colors.black;
+    final TextPainter tp = TextPainter(
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    _antsPos.asMap().forEach((i, antPath) {
+      Offset p;
+      if (antPath[antPath.length - 1] == -1) {
+        p = Offset(
+            _visualPoints[antPath[antPath.length - 2]][1].toDouble() * k +
+                (size.width - k * (_width / _grid)) / 2,
+            _visualPoints[antPath[antPath.length - 2]][0].toDouble() * k +
+                (size.height - k * (_heigth / _grid)) / 2);
+      } else {
+        if (_anti > antPath.length) {
+          p = Offset(
+              _visualPoints[antPath[antPath.length - 1]][1].toDouble() * k +
+                  (size.width - k * (_width / _grid)) / 2,
+              _visualPoints[antPath[antPath.length - 1]][0].toDouble() * k +
+                  (size.height - k * (_heigth / _grid)) / 2);
+        } else {
+          Offset p1 = Offset(
+              _visualPoints[antPath[_anti - 2]][1].toDouble() * k +
+                  (size.width - k * (_width / _grid)) / 2,
+              _visualPoints[antPath[_anti - 2]][0].toDouble() * k +
+                  (size.height - k * (_heigth / _grid)) / 2);
+          Offset p2 = Offset(
+              _visualPoints[antPath[_anti - 1]][1].toDouble() * k +
+                  (size.width - k * (_width / _grid)) / 2,
+              _visualPoints[antPath[_anti - 1]][0].toDouble() * k +
+                  (size.height - k * (_heigth / _grid)) / 2);
+          p = p1 + (p2 - p1) * ai.toDouble() / 20;
+        }
+      }
+      canvas.drawCircle(
+        p + Offset(Random().nextDouble(), Random().nextDouble()) * 5,
+        4,
+        myPaint,
+      );
+      TextSpan span = TextSpan(
+        text: (i + 1).toString(),
+        style: TextStyle(
+          color: Colors.pink,
+          fontSize: k * 10,
+        ),
+      );
+      tp..text = span;
+      tp.layout();
+      tp.paint(canvas, p);
+    });
+    if (ai < 20) ai++;
   }
 
   bool parseData() {
@@ -419,13 +509,21 @@ class MapPainterAnt extends CustomPainter {
             _visualPoints[j][0].toDouble() * k +
                 (size.height - k * (_heigth / _grid)) / 2);
         double width =
-            (_pathPhermonone[i][j] - miP) / (mxP - miP) * 5.5 * k * mxP / 900;
+            (_pathPhermonone[i][j] - miP) / (mxP - miP) * 5.5 * k * mxP / 100;
         myPaint
           ..strokeWidth = width
           ..strokeCap = StrokeCap.round;
         canvas.drawLine(p1, p2, myPaint);
       }
     }
+  }
+
+  Offset getOffset(Size size, double k, int i, List<int> tmpPath) {
+    return Offset(
+        _visualPoints[tmpPath[i]][1].toDouble() * k +
+            (size.width - k * (_width / _grid)) / 2,
+        _visualPoints[tmpPath[i]][0].toDouble() * k +
+            (size.height - k * (_heigth / _grid)) / 2);
   }
 
   void drawPathRoute(Canvas canvas, Size size, Paint myPaint, double k) {
@@ -435,33 +533,24 @@ class MapPainterAnt extends CustomPainter {
     myPaint
       ..color = Colors.orange
       ..strokeWidth = k;
-    for (int i = 0; i < _pathRoute.length; i++) {
-      Offset p1 = Offset(
-          _visualPoints[_pathRoute[i]][1].toDouble() * k +
-              (size.width - k * (_width / _grid)) / 2,
-          _visualPoints[_pathRoute[i]][0].toDouble() * k +
-              (size.height - k * (_heigth / _grid)) / 2);
+    final TextPainter tp = TextPainter(
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    for (int i = 0; i < _i + 1; i++) {
+      Offset p1 = getOffset(size, k, i, _pathRoute);
       if (i < _pathRoute.length - 1) {
-        Offset p2 = Offset(
-            _visualPoints[_pathRoute[i + 1]][1].toDouble() * k +
-                (size.width - k * (_width / _grid)) / 2,
-            _visualPoints[_pathRoute[i + 1]][0].toDouble() * k +
-                (size.height - k * (_heigth / _grid)) / 2);
+        Offset p2 = getOffset(size, k, i + 1, _pathRoute);
         canvas.drawLine(p1 + Offset(0, 0), p2 + Offset(0, 0), myPaint);
       }
       TextSpan span = TextSpan(
         text: i.toString(),
         style: TextStyle(
           color: Colors.orange,
-          fontSize: k * 10,
-          fontWeight: FontWeight.bold,
+          fontSize: k * 7,
         ),
       );
-      TextPainter tp = TextPainter(
-        text: span,
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
-      );
+      tp..text = span;
       tp.layout();
       tp.paint(canvas, p1);
     }
@@ -476,33 +565,25 @@ class MapPainterAnt extends CustomPainter {
     myPaint
       ..color = Colors.green
       ..strokeWidth = k;
+    final TextPainter tp = TextPainter(
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    TextSpan span = TextSpan();
     for (int i = 0; i < _pathRouteOp.length; i++) {
-      Offset p1 = Offset(
-          _visualPoints[_pathRouteOp[i]][1].toDouble() * k +
-              (size.width - k * (_width / _grid)) / 2,
-          _visualPoints[_pathRouteOp[i]][0].toDouble() * k +
-              (size.height - k * (_heigth / _grid)) / 2);
+      Offset p1 = getOffset(size, k, i, _pathRouteOp);
       if (i < _pathRouteOp.length - 1) {
-        Offset p2 = Offset(
-            _visualPoints[_pathRouteOp[i + 1]][1].toDouble() * k +
-                (size.width - k * (_width / _grid)) / 2,
-            _visualPoints[_pathRouteOp[i + 1]][0].toDouble() * k +
-                (size.height - k * (_heigth / _grid)) / 2);
+        Offset p2 = getOffset(size, k, i + 1, _pathRouteOp);
         canvas.drawLine(p1, p2, myPaint);
       }
-      TextSpan span = TextSpan(
+      span = TextSpan(
         text: i.toString(),
         style: TextStyle(
           color: Colors.green,
-          fontSize: k * 10,
-          fontWeight: FontWeight.bold,
+          fontSize: k * 7,
         ),
       );
-      TextPainter tp = TextPainter(
-        text: span,
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
-      );
+      tp..text = span;
       tp.layout();
       tp.paint(canvas, p1);
     }

@@ -22,18 +22,25 @@ class _MySwitchButtonState extends State<MySwitchButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Switch(
-      value: _value,
-      onChanged: (newValue) {
-        setState(() {
-          _value = newValue;
-        });
-        if (widget._algorithmName == 'A*')
-          (showMapKey.currentState as ShowMapForAState).toggleShowOp(newValue);
-        else
-          (showMapKeyForAnt.currentState as ShowMapForAntState)
-              .toggleShowOp(newValue);
-      },
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('过滤：'),
+        Switch(
+          value: _value,
+          onChanged: (newValue) {
+            setState(() {
+              _value = newValue;
+            });
+            if (widget._algorithmName == 'A*')
+              (showMapKey.currentState as ShowMapForAState)
+                  .toggleShowOp(newValue);
+            else
+              (showMapKeyForAnt.currentState as ShowMapForAntState)
+                  .toggleShowOp(newValue);
+          },
+        ),
+      ],
     );
   }
 }
