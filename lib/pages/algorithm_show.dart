@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:path_planning/utils.dart';
 import 'package:path_planning/components/controll_and_show_map_a.dart';
 import 'package:path_planning/components/controll_and_show_map_ant.dart';
-import 'package:toast/toast.dart';
 
 class AlgorithmShow extends StatefulWidget {
   final String algorithmName;
@@ -23,12 +22,32 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: () {
-              Toast.show(
-                "Toast plugin app",
-                context,
-                duration: Toast.LENGTH_SHORT,
-                gravity: Toast.TOP,
+            onPressed: () async {
+              OverlayEntry entry = OverlayEntry(builder: (context) {
+                return Positioned(
+                  top: 60,
+                  right: 3,
+                  child: Container(
+                    width: 200,
+                    height: 250,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(8),
+                    child: Text(
+                      'cdsc',
+                      style: GoogleFonts.jua(
+                        textStyle: TextStyle(
+                          color: Colors.black,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                    color: Colors.teal[100].withOpacity(0.8),
+                  ),
+                );
+              });
+              Overlay.of(context).insert(entry);
+              await Future.delayed(Duration(milliseconds: 2000)).then(
+                (value) => entry.remove(),
               );
             },
             child: Icon(Icons.help),

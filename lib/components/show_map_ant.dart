@@ -39,6 +39,19 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   int _i = 0;
   int _anti = 1;
   bool _isDispose = false;
+  Size _mapSize;
+  double _grid;
+  double _width;
+  double _heigth;
+  double _k;
+
+  void setSize(Size size, double grid, double width, double heigth, double k) {
+    _mapSize = size;
+    _grid = grid;
+    _width = width;
+    _heigth = heigth;
+    _k = k;
+  }
 
   @override
   void initState() {
@@ -62,7 +75,29 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     return _isDone
         ? GestureDetector(
             onTapDown: (details) {
-              print(details.localPosition);
+              double dx = details.localPosition.dx;
+              double dy = details.localPosition.dy;
+              for (int i = 0; i < _visualPoints.length - 1; i++) {
+                for (int j = i + 1; j < _visualPoints.length; j++) {
+                  double p1H = _visualPoints[i][1].toDouble() * _k +
+                      (_mapSize.width - _k * (_width / _grid)) / 2;
+                  double p1W = _visualPoints[i][0].toDouble() * _k +
+                      (_mapSize.height - _k * (_heigth / _grid)) / 2;
+                  double p2H = _visualPoints[j][1].toDouble() * _k +
+                      (_mapSize.width - _k * (_width / _grid)) / 2;
+                  double p2W = _visualPoints[j][0].toDouble() * _k +
+                      (_mapSize.height - _k * (_heigth / _grid)) / 2;
+                  double k1 = (p1W - dx) / (p1H - dy);
+                  double k2 = (dx - p2W) / (dy - p2H);
+                  return;
+                  if ((k1 - k2).abs() < 0.1 &&
+                      (p1W - dx) * (p2W - dx) < 0 &&
+                      (p1H - dy) * (p2H - dy) < 0) {
+                    print(_pathPhermonone[i][j]);
+                    return;
+                  }
+                }
+              }
             },
             child: AnimatedBuilder(
               animation: _controller,
@@ -357,6 +392,13 @@ class MapPainterAnt extends CustomPainter {
     double k = size.width / gridWidth < size.height / gridHeigth
         ? size.width / gridWidth
         : size.height / gridHeigth;
+    (showMapKeyForAnt.currentState as ShowMapForAntState).setSize(
+      size,
+      _grid,
+      _width,
+      _heigth,
+      k,
+    );
 
     Paint myPaint = Paint()..color = Colors.black;
     drawBarriers(canvas, size, myPaint, k);

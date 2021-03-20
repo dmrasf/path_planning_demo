@@ -5,7 +5,6 @@ import 'package:path_planning/components/my_textfield.dart';
 import 'package:path_planning/components/show_map_ant.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/toggle_button.dart';
-import 'package:path_planning/components/my_slider.dart';
 import 'package:path_planning/components/my_switch_button.dart';
 
 class ControllAndShowMapForAnt extends StatefulWidget {
