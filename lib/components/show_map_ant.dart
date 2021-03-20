@@ -197,7 +197,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     );
     for (int i = 0; i < _pathRoute.length; i++) {
       _i = i;
-      await Future.delayed(Duration(milliseconds: 200));
+      await Future.delayed(Duration(milliseconds: 100));
     }
   }
 
@@ -412,6 +412,7 @@ class MapPainterAnt extends CustomPainter {
 
     Paint myPaint = Paint()..color = Colors.black;
     drawBarriers(canvas, size, myPaint, k);
+    //drawAxis(canvas, size, myPaint, k);
     drawPath(canvas, size, myPaint, k);
     if (_isShowOp)
       drawPathRouteOp(canvas, size, myPaint, k);
@@ -512,6 +513,57 @@ class MapPainterAnt extends CustomPainter {
       }
       path..close();
       canvas.drawPath(path, myPaint);
+    }
+  }
+
+  void drawAxis(Canvas canvas, Size size, Paint myPaint, double k) {
+    double minY = (size.height - k * (_heigth / _grid)) / 2;
+    double maxY = _heigth / _grid * k + minY;
+    double minX = (size.width - k * (_width / _grid)) / 2;
+    double maxX = _width / _grid * k + minX;
+    Offset p1 = Offset(minX, maxY);
+    Offset p2 = Offset(maxX, maxY);
+    myPaint
+      ..strokeWidth = 1
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(p1, p2, myPaint);
+    p1 = Offset(maxX, minY);
+    p2 = Offset(maxX, maxY);
+    canvas.drawLine(p1, p2, myPaint);
+    double mPp = (maxY - minY) / _heigth;
+    TextPainter tp = TextPainter(
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    int m = 0;
+    for (double i = minX; i <= maxX; i += mPp) {
+      canvas.drawCircle(Offset(i, maxY), 2, myPaint);
+      tp
+        ..text = TextSpan(
+          text: m.toString(),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+          ),
+        );
+      tp.layout();
+      tp.paint(canvas, Offset(i, maxY));
+      m++;
+    }
+    m = 0;
+    for (double i = minY; i <= maxY; i += mPp) {
+      canvas.drawCircle(Offset(maxX, i), 2, myPaint);
+      tp
+        ..text = TextSpan(
+          text: m.toString(),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+          ),
+        );
+      tp.layout();
+      tp.paint(canvas, Offset(maxX, i));
+      m++;
     }
   }
 

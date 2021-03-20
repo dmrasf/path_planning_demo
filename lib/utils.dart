@@ -13,8 +13,7 @@ Future<String> pickFile(String extension) async {
   if (pr.exitCode != 0) {
     print("zenity not found.");
     return null;
-  } else
-    print("zenity found.");
+  }
 
   if (extension == "undefined") {
     _noExtension = true;
