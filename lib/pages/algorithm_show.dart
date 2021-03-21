@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_planning/utils.dart';
-import 'package:path_planning/components/controll_and_show_map_a.dart';
-import 'package:path_planning/components/controll_and_show_map_ant.dart';
+import 'package:path_planning/pages/map_show.dart';
 
 class AlgorithmShow extends StatefulWidget {
   final String algorithmName;
@@ -20,48 +19,8 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
       appBar: AppBar(
         title: Text(widget.algorithmName),
         centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: () async {
-              OverlayEntry entry = OverlayEntry(builder: (context) {
-                return Positioned(
-                  top: 60,
-                  right: 3,
-                  child: Container(
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.all(8),
-                    child: Text(
-                      widget.algorithmName == 'A*'
-                          ? 'H: to end\nG: to point'
-                          : 'a: \nb: \np: ',
-                      style: GoogleFonts.jua(
-                        textStyle: TextStyle(
-                          fontSize: 20,
-                          color: Colors.black,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.8),
-                      borderRadius: BorderRadius.all(Radius.circular(3.0)),
-                    ),
-                  ),
-                );
-              });
-              Overlay.of(context).insert(entry);
-              await Future.delayed(Duration(milliseconds: 300)).then(
-                (value) => entry.remove(),
-              );
-            },
-            child: Icon(Icons.help),
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all(Colors.black),
-            ),
-          ),
-        ],
       ),
-      body: _fileName == null ? pickFileButton() : showMap(),
+      body: pickFileButton(),
       //body: showMap(),
     );
   }
@@ -72,7 +31,23 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
         onPressed: () async {
           _fileName = await pickFile('json');
           if (_fileName != null && _fileName != '') {
-            setState(() {});
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    MapShow(widget.algorithmName, _fileName),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(
+                    opacity: animation.drive(
+                      Tween(begin: 0.0, end: 1.0).chain(
+                        CurveTween(curve: Curves.ease),
+                      ),
+                    ),
+                    child: child,
+                  );
+                },
+              ),
+            );
           }
         },
         child: Text('Pick Map File'),
@@ -91,12 +66,5 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
         ),
       ),
     );
-  }
-
-  Widget showMap() {
-    if (widget.algorithmName == 'A*')
-      return ControllAndShowMapForA(_fileName);
-    else
-      return ControllAndShowMapForAnt(_fileName);
   }
 }

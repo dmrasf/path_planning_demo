@@ -9,15 +9,15 @@ class ShowPathDistance extends StatefulWidget {
 }
 
 class ShowPathDistanceState extends State<ShowPathDistance> {
-  String _text = 'Path diatance: null';
+  String _text = '0 m';
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Text(
         _text,
-        style: GoogleFonts.lato(
+        style: GoogleFonts.syncopate(
           textStyle: TextStyle(
-            fontSize: 15,
+            fontSize: 23,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -27,7 +27,7 @@ class ShowPathDistanceState extends State<ShowPathDistance> {
 
   void update(String newString) {
     setState(() {
-      _text = newString;
+      _text = newString + ' m';
     });
   }
 }

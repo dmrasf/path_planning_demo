@@ -7,6 +7,7 @@ import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/toggle_button.dart';
 import 'package:path_planning/components/my_switch_button.dart';
 import 'package:path_planning/components/my_slider.dart';
+import 'package:path_planning/components/my_button.dart';
 
 class ControllAndShowMapForAnt extends StatefulWidget {
   final String _fileName;
@@ -59,20 +60,19 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
             ),
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Setting params',
-                  style: GoogleFonts.exo(
-                    textStyle: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  'Setting parameters',
+                  style: GoogleFonts.asar(
+                    textStyle: TextStyle(fontSize: 18),
                   ),
                 ),
-                Spacer(),
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.5,
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  margin: EdgeInsets.symmetric(vertical: 10),
                   child: ListView(
+                    shrinkWrap: true,
                     children: [
                       MyTextField(
                         _controllerAntsNum,
@@ -126,15 +126,12 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                     ],
                   ),
                 ),
-                Spacer(),
                 ShowPathDistance(key: showPathDiatance),
-                SizedBox(height: 10),
                 MySwitchButton(false, 'Ants', '过滤', 0),
                 MySwitchButton(false, 'Ants', '显示蚂蚁', 1),
-                Spacer(),
                 MySlider('Ants'),
-                OutlinedButton(
-                  onPressed: () {
+                MyButton(
+                  () {
                     _focusNodeIteration.unfocus();
                     _focusNodeInitPathPheromone.unfocus();
                     _focusNodeAntPheromone.unfocus();
@@ -174,23 +171,6 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                       ),
                     );
                   },
-                  child: Text(
-                    'START',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  style: ButtonStyle(
-                    side: MaterialStateProperty.all(BorderSide(
-                      width: 2,
-                      color: Color(0x6f000000),
-                    )),
-                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 30,
-                    )),
-                    foregroundColor: MaterialStateProperty.all(
-                      Color(0xaf000000),
-                    ),
-                  ),
                 ),
               ],
             ),

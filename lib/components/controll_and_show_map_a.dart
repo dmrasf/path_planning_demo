@@ -6,6 +6,7 @@ import 'package:path_planning/components/show_map_a.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/toggle_button.dart';
 import 'package:path_planning/components/my_slider.dart';
+import 'package:path_planning/components/my_button.dart';
 import 'package:path_planning/components/my_switch_button.dart';
 
 class ControllAndShowMapForA extends StatefulWidget {
@@ -41,69 +42,49 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
               color: Colors.white,
               boxShadow: [BoxShadow(color: Color(0x2f000000), blurRadius: 1.0)],
             ),
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Setting params',
-                  style: GoogleFonts.exo(
-                    textStyle: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  'Setting parameters',
+                  style: GoogleFonts.asar(
+                    textStyle: TextStyle(fontSize: 18),
                   ),
                 ),
-                Spacer(),
-                MyTextField(
-                  this._controllerH,
-                  this._focusNodeH,
-                  'H 权重',
-                  'double',
-                  r'^\d+[\.\d]?\d*$',
+                Column(
+                  children: [
+                    MyTextField(
+                      this._controllerH,
+                      this._focusNodeH,
+                      'H 权重',
+                      'double',
+                      r'^\d+[\.\d]?\d*$',
+                    ),
+                    MyTextField(
+                      this._controllerG,
+                      this._focusNodeG,
+                      'G 权重',
+                      'double',
+                      r'^\d+[\.\d]?\d*$',
+                    ),
+                  ],
                 ),
-                MyTextField(
-                  this._controllerG,
-                  this._focusNodeG,
-                  'G 权重',
-                  'double',
-                  r'^\d+[\.\d]?\d*$',
-                ),
-                Spacer(),
                 ShowPathDistance(key: showPathDiatance),
                 MySwitchButton(false, 'A*', '过滤', 0),
-                Spacer(),
                 MySlider('A*'),
-                OutlinedButton(
-                  onPressed: () {
-                    _focusNodeH.unfocus();
-                    _focusNodeG.unfocus();
-                    (showMapKey.currentState as ShowMapForAState).run(
-                      double.parse(
-                        _controllerH.text.isEmpty ? '1.0' : _controllerH.text,
-                      ),
-                      double.parse(
-                        _controllerG.text.isEmpty ? '1.0' : _controllerG.text,
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'START',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  style: ButtonStyle(
-                    side: MaterialStateProperty.all(BorderSide(
-                      width: 2,
-                      color: Color(0x6f000000),
-                    )),
-                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 30,
-                    )),
-                    foregroundColor: MaterialStateProperty.all(
-                      Color(0xaf000000),
+                MyButton(() {
+                  _focusNodeH.unfocus();
+                  _focusNodeG.unfocus();
+                  (showMapKey.currentState as ShowMapForAState).run(
+                    double.parse(
+                      _controllerH.text.isEmpty ? '1.0' : _controllerH.text,
                     ),
-                  ),
-                ),
+                    double.parse(
+                      _controllerG.text.isEmpty ? '1.0' : _controllerG.text,
+                    ),
+                  );
+                }),
               ],
             ),
           ),

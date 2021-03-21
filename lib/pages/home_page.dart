@@ -11,11 +11,22 @@ class HomePage extends StatelessWidget {
       height: double.infinity,
       width: double.infinity,
       alignment: Alignment.center,
+      padding: EdgeInsets.all(20),
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Text(
+                'Algorithm demo',
+                style: GoogleFonts.gotu(
+                  textStyle: TextStyle(
+                    fontSize: MediaQuery.of(context).size.height * 0.04,
+                    decoration: TextDecoration.none,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
               Tooltip(
                 message: '退出',
                 child: TextButton(
@@ -25,8 +36,7 @@ class HomePage extends StatelessWidget {
                   child: Icon(Icons.exit_to_app_rounded),
                   style: ButtonStyle(
                     foregroundColor: MaterialStateProperty.all(Colors.black),
-                    padding:
-                        MaterialStateProperty.all(EdgeInsets.only(top: 30)),
+                    minimumSize: MaterialStateProperty.all(Size.zero),
                   ),
                 ),
               ),

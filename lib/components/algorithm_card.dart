@@ -16,7 +16,7 @@ class _AlgorithmCardState extends State<AlgorithmCard> {
 
   @override
   Widget build(BuildContext context) {
-    _height = MediaQuery.of(this.context).size.height * 0.45;
+    _height = MediaQuery.of(this.context).size.height * 0.30;
     _width = MediaQuery.of(this.context).size.width * 0.35;
     return TextButton(
       onPressed: () {
@@ -40,6 +40,7 @@ class _AlgorithmCardState extends State<AlgorithmCard> {
       },
       child: Text(widget.algorithmName),
       style: ButtonStyle(
+        animationDuration: Duration(milliseconds: 200),
         padding: MaterialStateProperty.all(EdgeInsets.all(20)),
         minimumSize: MaterialStateProperty.all(Size(_width, _height)),
         textStyle: MaterialStateProperty.all(
@@ -50,10 +51,8 @@ class _AlgorithmCardState extends State<AlgorithmCard> {
         backgroundColor: MaterialStateProperty.all(Color(0x0f000000)),
         foregroundColor: MaterialStateProperty.all(Colors.black),
         overlayColor: MaterialStateProperty.all(Colors.transparent),
-        side: MaterialStateProperty.all(BorderSide(
-          width: 3,
-          color: Colors.black,
-        )),
+        elevation: MaterialStateProperty.all(7),
+        side: MaterialStateProperty.all(BorderSide.none),
       ),
     );
   }
