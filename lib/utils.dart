@@ -54,20 +54,6 @@ Future<String> buildMap(String fileName) async {
     return pr.stdout.toString().trim();
 }
 
-/// Selects a random element from [options] with optional [weights].
-///
-/// If [weights] is provided, it will be used to select an option
-/// according to a weighted distribution. If it is not provided,
-/// an option will be selected according to a uniform distribution.
-///
-/// Throws an [ArgumentError] if [options] is empty.
-/// Throws an [ArgumentError] if [weights] is non-empty and does not
-/// match the length of [options].
-///
-/// ```dart
-/// randomChoice(['hi', 'hello'], [0.7, 0.3]) // 70% chance of 'hi', 30% chance of 'hello'
-/// randomChoice(['hi', 'hey']) // 'hi' and 'hey' are equally likely. Equivalent to randomChoice(['hi', 'hey'], [1, 1])
-/// ```
 T randomChoice<T>(Iterable<T> options, [Iterable<double> weights = const []]) {
   if (options.isEmpty) {
     throw ArgumentError.value(

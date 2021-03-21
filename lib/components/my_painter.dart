@@ -12,6 +12,7 @@ class MapPainter extends CustomPainter {
   double _heigth;
   double _grid;
   double _robotSize;
+  String _mapName;
   List<dynamic> _barriers;
 
   double get width => _width;
@@ -94,6 +95,7 @@ class MapPainter extends CustomPainter {
       _grid = _myMap['grid'].toDouble();
       _robotSize = _myMap['robotSize'].toDouble();
       _barriers = _myMap['barriers'];
+      _mapName = _myMap['name'];
     } catch (e) {
       print(e.toString());
       return false;
@@ -170,13 +172,34 @@ class MapPainter extends CustomPainter {
     }
   }
 
+  void drawName(Canvas canvas, Size size, Paint myPaint, double k) {
+    TextSpan span = TextSpan(
+      text: _mapName,
+      style: GoogleFonts.jua(
+        textStyle: TextStyle(
+          color: Colors.black.withOpacity(0.1),
+          fontSize: 100,
+        ),
+      ),
+    );
+    TextPainter tp = TextPainter(
+      text: span,
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    tp.layout();
+    tp.paint(canvas, Offset(0, size.height / 2));
+  }
+
   void drawState(
       Canvas canvas, Size size, Paint myPaint, double k, String state) {
     TextSpan span = TextSpan(
       text: state,
-      style: TextStyle(
-        color: Colors.black,
-        fontSize: k * 10,
+      style: GoogleFonts.jua(
+        textStyle: TextStyle(
+          color: Colors.black,
+          fontSize: 25,
+        ),
       ),
     );
     TextPainter tp = TextPainter(

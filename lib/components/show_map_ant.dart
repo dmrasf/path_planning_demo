@@ -171,7 +171,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     );
     for (int i = 0; i < _pathRoute.length; i++) {
       _i = i;
-      await Future.delayed(Duration(milliseconds: 200));
+      await Future.delayed(Duration(milliseconds: 100));
     }
   }
 
@@ -374,7 +374,8 @@ class PainteAnt extends MapPainter {
         : size.height / gridHeigth;
 
     Paint myPaint = Paint()..color = Colors.black;
-    drawBarriers(canvas, size, myPaint, k);
+    //super.drawName(canvas, size, myPaint, k);
+    super.drawBarriers(canvas, size, myPaint, k);
     //drawAxis(canvas, size, myPaint, k);
     drawPhermone(canvas, size, myPaint, k);
     if (_isShowOp)
@@ -429,7 +430,7 @@ class PainteAnt extends MapPainter {
       canvas.drawCircle(
         p +
             Offset(Random().nextDouble() - 0.5, Random().nextDouble() - 0.5) *
-                8,
+                5,
         k * 2,
         myPaint,
       );

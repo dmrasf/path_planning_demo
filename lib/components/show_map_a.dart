@@ -321,6 +321,7 @@ class PainteA extends MapPainter {
 
     Paint myPaint = Paint()..color = Colors.black;
     super.drawBarriers(canvas, size, myPaint, k);
+    //super.drawAxis(canvas, size, myPaint, k);
     if (_isShowOp)
       super.drawPathRoute(canvas, size, myPaint, k, _pathRouteOp, Colors.green,
           Colors.green.shade900, _pathRouteOp.length);
