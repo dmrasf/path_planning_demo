@@ -33,7 +33,6 @@ class ShowMapForAState extends State<ShowMapForA>
   int _speed = 300;
   int _i = 0;
   String _state = '';
-  bool _isDisPose = false;
 
   @override
   void initState() {
@@ -48,7 +47,6 @@ class ShowMapForAState extends State<ShowMapForA>
   @override
   void dispose() {
     _controller.dispose();
-    _isDisPose = true;
     super.dispose();
   }
 
@@ -121,7 +119,6 @@ class ShowMapForAState extends State<ShowMapForA>
     List<int> currentPoint = [start, start];
     _closePoints.add(currentPoint);
     while (true) {
-      if (_isDisPose) return;
       _updateOpenPoints(currentPoint);
       currentPoint = _findNextPoint(currentPoint, hWeight, gWeight);
       _state = 'Update close set';

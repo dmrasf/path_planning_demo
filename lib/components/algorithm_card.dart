@@ -38,7 +38,7 @@ class _AlgorithmCardState extends State<AlgorithmCard> {
           ),
         );
       },
-      child: Text(widget.algorithmName),
+      child: Text(widget.algorithmName + ' Algorithm'),
       style: ButtonStyle(
         animationDuration: Duration(milliseconds: 200),
         padding: MaterialStateProperty.all(EdgeInsets.all(20)),

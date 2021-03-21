@@ -42,7 +42,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   int _i = 0;
   int _anti = 1;
   bool _isShowAnts = false;
-  bool _isDisPose = false;
   String _state = '';
   int _animationForShowAntsi = 0;
 
@@ -59,7 +58,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   @override
   void dispose() {
     _controller.dispose();
-    _isDisPose = true;
     super.dispose();
   }
 
@@ -157,9 +155,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _state = 'Running . . .';
     _initPathPhermonone();
     for (int i = 0; i < _iterationNum; i++) {
-      if (_isDisPose) {
-        return;
-      }
       _currentIter = i + 1;
       _setAntsPosition();
       while (true) if (await _selectNextPosForAnts()) break;

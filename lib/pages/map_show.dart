@@ -23,14 +23,16 @@ class MapShow extends StatelessWidget {
                   child: Container(
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(8),
+                    width: 200,
                     child: Text(
                       _algorithmName == 'A*'
                           ? 'H: to end\nG: to point'
                           : 'a: \nb: \np: ',
-                      style: GoogleFonts.lato(
+                      style: GoogleFonts.ntr(
                         textStyle: TextStyle(
                           fontSize: 20,
                           color: Colors.black,
+                          fontWeight: FontWeight.w400,
                           decoration: TextDecoration.none,
                         ),
                       ),
@@ -43,7 +45,7 @@ class MapShow extends StatelessWidget {
                 );
               });
               Overlay.of(context).insert(entry);
-              await Future.delayed(Duration(milliseconds: 300)).then(
+              await Future.delayed(Duration(milliseconds: 1000)).then(
                 (value) => entry.remove(),
               );
             },

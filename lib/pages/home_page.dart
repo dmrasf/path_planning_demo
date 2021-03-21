@@ -58,7 +58,7 @@ class HomePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               AlgorithmCard('A*'),
-              AlgorithmCard('Ants'),
+              AlgorithmCard('Ant Colony'),
             ],
           ),
           Spacer(),

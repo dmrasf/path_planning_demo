@@ -9,7 +9,7 @@ class ShowPathDistance extends StatefulWidget {
 }
 
 class ShowPathDistanceState extends State<ShowPathDistance> {
-  String _text = '0 m';
+  String _text = '0.00 m';
   @override
   Widget build(BuildContext context) {
     return Container(

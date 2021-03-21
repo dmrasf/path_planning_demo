@@ -127,9 +127,9 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                   ),
                 ),
                 ShowPathDistance(key: showPathDiatance),
-                MySwitchButton(false, 'Ants', '过滤', 0),
-                MySwitchButton(false, 'Ants', '显示蚂蚁', 1),
-                MySlider('Ants'),
+                MySwitchButton(false, 'Ant Colony', '过滤', 0),
+                MySwitchButton(false, 'Ant Colony', '显示蚂蚁', 1),
+                MySlider('Ant Colony'),
                 MyButton(
                   () {
                     _focusNodeIteration.unfocus();
