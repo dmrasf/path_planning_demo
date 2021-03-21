@@ -124,7 +124,7 @@ class ShowMapForAState extends State<ShowMapForA>
       if (_isDisPose) return;
       _updateOpenPoints(currentPoint);
       currentPoint = _findNextPoint(currentPoint, hWeight, gWeight);
-      _state = 'Update Close Set';
+      _state = 'Update close set';
       await Future.delayed(Duration(milliseconds: _speed));
       try {
         bool isBreak = false;
@@ -137,15 +137,15 @@ class ShowMapForAState extends State<ShowMapForA>
         if (!isBreak) throw UnimplementedError();
         _openPoints.removeAt(i);
       } catch (e) {
-        _state = 'Faile, No Path!';
+        _state = 'Failure, No path !';
         return;
       }
       if (!_closePoints.contains(currentPoint)) _closePoints.add(currentPoint);
-      _state = 'Update Open Set & Find Next Point';
+      _state = 'Update open set & Find next positon';
       await Future.delayed(Duration(milliseconds: _speed));
       if (currentPoint[0] == end) break;
     }
-    _state = 'Success';
+    _state = 'Success !';
     _closePoints.remove([start, start]);
     _parsePathRoute();
     _optimisingPath();
@@ -287,7 +287,6 @@ class ShowMapForAState extends State<ShowMapForA>
 }
 
 class PainteA extends MapPainter {
-  final Map<String, dynamic> _myMap;
   final List<dynamic> _visualPoints;
   final List<dynamic> _closePoints;
   final List<dynamic> _openPoints;
@@ -298,7 +297,7 @@ class PainteA extends MapPainter {
   final bool _isShowOp;
   final int _i;
   PainteA(
-    this._myMap,
+    _myMap,
     this._visualPoints,
     this._openPoints,
     this._openPointsValue,
@@ -347,13 +346,15 @@ class PainteA extends MapPainter {
       if (_openPointsValue.isNotEmpty) {
         double ma = _openPointsValue.reduce(max);
         double mi = _openPointsValue.reduce(min);
-        double fontSize = k * (5 - 3 * (_openPointsValue[i] - mi) / (ma - mi));
+        double fontSize = k * (7 - 3 * (_openPointsValue[i] - mi) / (ma - mi));
         TextSpan span = TextSpan(
-          text: _openPointsValue[i].toStringAsFixed(2),
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
+          text: _openPointsValue[i].toStringAsFixed(1),
+          style: GoogleFonts.jua(
+            textStyle: TextStyle(
+              color: Colors.black,
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         );
         TextPainter tp = TextPainter(
@@ -362,7 +363,7 @@ class PainteA extends MapPainter {
           textDirection: TextDirection.ltr,
         );
         tp.layout();
-        tp.paint(canvas, offset + Offset(-fontSize, -fontSize * 0.6));
+        tp.paint(canvas, offset + Offset(-fontSize * 0.7, -fontSize * 0.6));
       }
     }
     for (int i = 0; i < _closePoints.length; i++) {

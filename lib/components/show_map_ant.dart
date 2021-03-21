@@ -44,6 +44,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   bool _isShowAnts = false;
   bool _isDisPose = false;
   String _state = '';
+  int _animationForShowAntsi = 0;
 
   @override
   void initState() {
@@ -82,11 +83,16 @@ class ShowMapForAntState extends State<ShowMapForAnt>
                   this._anti,
                   this._isShowAnts,
                   this._state,
+                  this._animationForShowAntsi,
                 ),
               );
             },
           )
         : WaitShow(_remindStr, _r);
+  }
+
+  void changeAnimationi(int newValue) {
+    _animationForShowAntsi = newValue;
   }
 
   void getMapAnimation() async {
@@ -148,7 +154,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _pathRouteOp = [];
     _currentIter = 0;
     _i = 0;
-    _state = 'Running';
+    _state = 'Running . . .';
     _initPathPhermonone();
     for (int i = 0; i < _iterationNum; i++) {
       if (_isDisPose) {
@@ -162,9 +168,9 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     }
     _parseFinalRoute();
     if (_pathRoute.isEmpty)
-      _state = 'No Path';
+      _state = 'No path !';
     else
-      _state = 'Success';
+      _state = 'Success !';
     _optimisingPath();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       _calculatePathDistance().toStringAsFixed(2),
@@ -252,7 +258,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   Future<bool> _selectNextPosForAnts() async {
     bool isAllArrived = true;
-    ai = 0;
+    _animationForShowAntsi = 0;
     _anti = 1;
     for (List<int> antPath in _antsPos) {
       if (antPath[antPath.length - 1] == _visualPoints.length - 1)
@@ -286,7 +292,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       }
       if (antPath.length > _anti) _anti = antPath.length;
     }
-    while (ai < 20 && _isShowAnts)
+    while (_animationForShowAntsi < 20 && _isShowAnts)
       await Future.delayed(Duration(milliseconds: 0));
     return isAllArrived;
   }
@@ -335,10 +341,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   }
 }
 
-int ai = 0;
-
 class PainteAnt extends MapPainter {
-  final Map<String, dynamic> _myMap;
   final List<dynamic> _visualPoints;
   final List<List<double>> _pathPhermonone;
   final int _currentIter;
@@ -350,8 +353,9 @@ class PainteAnt extends MapPainter {
   final int _anti;
   final bool _isShowAnts;
   final String _state;
+  final int _animationForShowAntsi;
   PainteAnt(
-    this._myMap,
+    _myMap,
     this._visualPoints,
     this._pathPhermonone,
     this._currentIter,
@@ -363,6 +367,7 @@ class PainteAnt extends MapPainter {
     this._anti,
     this._isShowAnts,
     this._state,
+    this._animationForShowAntsi,
   ) : super(_myMap, _visualPoints);
   @override
   void paint(Canvas canvas, Size size) {
@@ -385,14 +390,15 @@ class PainteAnt extends MapPainter {
       super.drawPathRoute(canvas, size, myPaint, k, _pathRoute, Colors.orange,
           Colors.orange.shade900, _i + 1);
     drawRobot(canvas, size, myPaint, k);
-    String state = 'iteration: ' + _currentIter.toString() + '  ' + _state;
+    String state = '迭代次数：' + _currentIter.toString() + '  ' + _state;
     drawState(canvas, size, myPaint, k, state);
     if (_isShowAnts) drawAnts(canvas, size, myPaint, k);
   }
 
   void drawAnts(Canvas canvas, Size size, Paint myPaint, double k) {
     if (_anti < 2) {
-      ai = 20;
+      (showMapKeyForAnt.currentState as ShowMapForAntState)
+          .changeAnimationi(20);
       return;
     }
     myPaint..color = Colors.black;
@@ -425,7 +431,7 @@ class PainteAnt extends MapPainter {
                 (size.width - k * (super.width / super.grid)) / 2,
             _visualPoints[antPath[antPath.length - 1]][0].toDouble() * k +
                 (size.height - k * (super.heigth / super.grid)) / 2);
-        p = p1 + (p2 - p1) * ai.toDouble() / 20;
+        p = p1 + (p2 - p1) * _animationForShowAntsi.toDouble() / 20;
       }
       canvas.drawCircle(
         p +
@@ -447,7 +453,9 @@ class PainteAnt extends MapPainter {
       tp.layout();
       tp.paint(canvas, p);
     });
-    if (ai < 20) ai++;
+    if (_animationForShowAntsi < 20)
+      (showMapKeyForAnt.currentState as ShowMapForAntState)
+          .changeAnimationi(_animationForShowAntsi + 1);
   }
 
   void drawPhermone(Canvas canvas, Size size, Paint myPaint, double k) {
