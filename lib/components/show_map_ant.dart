@@ -366,7 +366,7 @@ class PainteAnt extends MapPainter {
   ) : super(_myMap, _visualPoints);
   @override
   void paint(Canvas canvas, Size size) {
-    if (!parseData()) return;
+    if (!super.parseData()) return;
     double gridWidth = super.width / super.grid;
     double gridHeigth = super.heigth / super.grid;
     double k = size.width / gridWidth < size.height / gridHeigth
@@ -379,10 +379,10 @@ class PainteAnt extends MapPainter {
     drawPhermone(canvas, size, myPaint, k);
     if (_isShowOp)
       super.drawPathRoute(canvas, size, myPaint, k, _pathRouteOp, Colors.green,
-          _pathRouteOp.length);
+          Colors.green.shade900, _pathRouteOp.length);
     else
-      super.drawPathRoute(
-          canvas, size, myPaint, k, _pathRoute, Colors.orange, _i + 1);
+      super.drawPathRoute(canvas, size, myPaint, k, _pathRoute, Colors.orange,
+          Colors.orange.shade900, _i + 1);
     drawRobot(canvas, size, myPaint, k);
     String state = 'iteration: ' + _currentIter.toString() + '  ' + _state;
     drawState(canvas, size, myPaint, k, state);
@@ -427,8 +427,10 @@ class PainteAnt extends MapPainter {
         p = p1 + (p2 - p1) * ai.toDouble() / 20;
       }
       canvas.drawCircle(
-        p + Offset(Random().nextDouble(), Random().nextDouble()) * 5,
-        4,
+        p +
+            Offset(Random().nextDouble() - 0.5, Random().nextDouble() - 0.5) *
+                8,
+        k * 2,
         myPaint,
       );
       TextSpan span = TextSpan(

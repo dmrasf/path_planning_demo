@@ -323,10 +323,10 @@ class PainteA extends MapPainter {
     super.drawBarriers(canvas, size, myPaint, k);
     if (_isShowOp)
       super.drawPathRoute(canvas, size, myPaint, k, _pathRouteOp, Colors.green,
-          _pathRouteOp.length);
+          Colors.green.shade900, _pathRouteOp.length);
     else
-      super.drawPathRoute(
-          canvas, size, myPaint, k, _pathRoute, Colors.orange, _i + 1);
+      super.drawPathRoute(canvas, size, myPaint, k, _pathRoute, Colors.orange,
+          Colors.orange.shade900, _i + 1);
     super.drawRobot(canvas, size, myPaint, k);
     drawSet(canvas, size, myPaint, k);
     super.drawState(canvas, size, myPaint, k, _state);

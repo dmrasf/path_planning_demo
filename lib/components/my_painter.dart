@@ -51,14 +51,15 @@ class MapPainter extends CustomPainter {
     Paint myPaint,
     double k,
     List<int> pathRoute,
-    Color color,
+    Color lineColor,
+    Color textColor,
     int len,
   ) {
     if (pathRoute.isEmpty ||
         (pathRoute[pathRoute.length - 1] != _visualPoints.length - 1 &&
             pathRoute[pathRoute.length - 1] != 0)) return;
     myPaint
-      ..color = color
+      ..color = lineColor
       ..strokeWidth = k * 4;
     final TextPainter tp = TextPainter(
       textAlign: TextAlign.center,
@@ -75,7 +76,7 @@ class MapPainter extends CustomPainter {
         text: i.toString(),
         style: GoogleFonts.jua(
           textStyle: TextStyle(
-            color: color,
+            color: textColor,
             fontSize: k * 10,
           ),
         ),
@@ -84,7 +85,6 @@ class MapPainter extends CustomPainter {
       tp.layout();
       tp.paint(canvas, p1 + Offset(4, 4));
     }
-    myPaint..color = color;
   }
 
   bool parseData() {
