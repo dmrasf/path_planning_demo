@@ -91,12 +91,12 @@ void showSnakBar(BuildContext context, String s) {
         style: GoogleFonts.jua(
           textStyle: TextStyle(
             color: Colors.black,
-            fontSize: 20,
+            fontSize: 15,
           ),
         ),
       ),
-      duration: Duration(milliseconds: 100),
-      backgroundColor: Colors.grey,
+      duration: Duration(milliseconds: 200),
+      backgroundColor: Colors.grey.withOpacity(0.5),
     ),
   );
 }

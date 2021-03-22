@@ -26,11 +26,11 @@ class MapShow extends StatelessWidget {
                     width: 200,
                     child: Text(
                       _algorithmName == 'A*'
-                          ? 'H: to end\nG: to point'
-                          : 'a: \nb: \np: ',
-                      style: GoogleFonts.ntr(
+                          ? 'H: 待选点到终点距离权重\nG: 当前点到待选点距离权重\nf = h + g'
+                          : 'a: 信息素权重\nb: 路径长度权重\np: 信息素挥发率(0, 1)',
+                      style: GoogleFonts.k2d(
                         textStyle: TextStyle(
-                          fontSize: 20,
+                          fontSize: 15,
                           color: Colors.black,
                           fontWeight: FontWeight.w400,
                           decoration: TextDecoration.none,

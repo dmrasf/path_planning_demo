@@ -135,6 +135,10 @@ class ShowMapForAState extends State<ShowMapForA>
 
   void run(double hWeight, double gWeight) async {
     if (!_isDone) return;
+    if (hWeight + gWeight == 0) {
+      showSnakBar(context, '参数不能同时为0');
+      return;
+    }
     _controller.reset();
     _controller.forward();
     _openPoints = [];
@@ -264,7 +268,8 @@ class ShowMapForAState extends State<ShowMapForA>
             ),
         0.5,
       );
-      double f = h * hWeight + g * gWeight;
+      double f =
+          h * (hWeight == 0 ? 1 : hWeight) + g * (gWeight == 0 ? 1 : gWeight);
       _openPointsValue.add(f);
       if (f < minDistance) {
         minDistance = f;
