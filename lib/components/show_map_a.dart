@@ -33,6 +33,7 @@ class ShowMapForAState extends State<ShowMapForA>
   int _speed = 300;
   int _i = 0;
   String _state = '';
+  bool _isShowAxis = false;
 
   @override
   void initState() {
@@ -66,6 +67,7 @@ class ShowMapForAState extends State<ShowMapForA>
                   this._pathRoute,
                   this._pathRouteOp,
                   this._isShowOp,
+                  this._isShowAxis,
                   this._state,
                   this._i,
                 ),
@@ -75,7 +77,7 @@ class ShowMapForAState extends State<ShowMapForA>
         : WaitShow(_remindStr, _r);
   }
 
-  void getMapAnimation() async {
+  Future<void> getMapAnimation() async {
     try {
       File f = File(widget.fileName);
       String mapStr = await f.readAsString();
@@ -97,11 +99,38 @@ class ShowMapForAState extends State<ShowMapForA>
     _speed = newSpeed;
   }
 
+  void toggleShowAxis(bool isShow) {
+    _isShowAxis = isShow;
+  }
+
   void toggleShowOp(bool isShow) {
     _isShowOp = isShow;
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       _calculatePathDistance().toStringAsFixed(2),
     );
+  }
+
+  Future<bool> save(String path) async {
+    if (_pathRouteOp.isEmpty) return false;
+    double grid = _myMap['grid'].toDouble();
+    List<dynamic> start = _myMap['start'];
+    List<dynamic> end = _myMap['end'];
+    List<List<dynamic>> realPath = [start];
+    for (int i = 1; i < _pathRouteOp.length - 1; i++)
+      realPath.add([
+        (num.parse(
+          (_visualPoints[_pathRouteOp[i]][0] * grid).toStringAsFixed(2),
+        )),
+        (num.parse(
+          (_visualPoints[_pathRouteOp[i]][1] * grid).toStringAsFixed(2),
+        ))
+      ]);
+    realPath.add(end);
+    String pathStr = jsonEncode(realPath);
+    File f = File(path);
+    await f.create();
+    await f.writeAsString(pathStr);
+    return true;
   }
 
   void run(double hWeight, double gWeight) async {
@@ -292,6 +321,7 @@ class PainteA extends MapPainter {
   final String _state;
   final List<int> _pathRouteOp;
   final bool _isShowOp;
+  final bool _isShowAxis;
   final int _i;
   PainteA(
     _myMap,
@@ -302,6 +332,7 @@ class PainteA extends MapPainter {
     this._pathRoute,
     this._pathRouteOp,
     this._isShowOp,
+    this._isShowAxis,
     this._state,
     this._i,
   ) : super(_myMap, _visualPoints);
@@ -317,7 +348,7 @@ class PainteA extends MapPainter {
 
     Paint myPaint = Paint()..color = Colors.black;
     super.drawBarriers(canvas, size, myPaint, k);
-    //super.drawAxis(canvas, size, myPaint, k);
+    if (_isShowAxis) super.drawAxis(canvas, size, myPaint, k);
     if (_isShowOp)
       super.drawPathRoute(canvas, size, myPaint, k, _pathRouteOp, Colors.green,
           Colors.green.shade900, _pathRouteOp.length);

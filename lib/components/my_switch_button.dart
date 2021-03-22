@@ -41,9 +41,17 @@ class _MySwitchButtonState extends State<MySwitchButton> {
               else
                 (showMapKeyForAnt.currentState as ShowMapForAntState)
                     .toggleShowOp(newValue);
-            } else
+            } else if (widget._type == 1) {
               (showMapKeyForAnt.currentState as ShowMapForAntState)
                   .toggleShowAnts(newValue);
+            } else if (widget._type == 2) {
+              if (widget._algorithmName == 'A*')
+                (showMapKey.currentState as ShowMapForAState)
+                    .toggleShowAxis(newValue);
+              else
+                (showMapKeyForAnt.currentState as ShowMapForAntState)
+                    .toggleShowAxis(newValue);
+            }
           },
         ),
       ],

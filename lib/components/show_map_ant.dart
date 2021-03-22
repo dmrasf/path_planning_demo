@@ -44,6 +44,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   bool _isShowAnts = false;
   String _state = '';
   int _animationForShowAntsi = 0;
+  bool _isShowAxis = false;
 
   @override
   void initState() {
@@ -80,6 +81,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
                   this._antsPos,
                   this._anti,
                   this._isShowAnts,
+                  this._isShowAxis,
                   this._state,
                   this._animationForShowAntsi,
                 ),
@@ -122,8 +124,35 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _isShowAnts = isShow;
   }
 
+  void toggleShowAxis(bool isShow) {
+    _isShowAxis = isShow;
+  }
+
   void changeSpeed(int newSpeed) {
     _speed = newSpeed;
+  }
+
+  Future<bool> save(String path) async {
+    if (_pathRouteOp.isEmpty) return false;
+    double grid = _myMap['grid'].toDouble();
+    List<dynamic> start = _myMap['start'];
+    List<dynamic> end = _myMap['end'];
+    List<List<dynamic>> realPath = [start];
+    for (int i = 1; i < _pathRouteOp.length - 1; i++)
+      realPath.add([
+        (num.parse(
+          (_visualPoints[_pathRouteOp[i]][0] * grid).toStringAsFixed(2),
+        )),
+        (num.parse(
+          (_visualPoints[_pathRouteOp[i]][1] * grid).toStringAsFixed(2),
+        ))
+      ]);
+    realPath.add(end);
+    String pathStr = jsonEncode(realPath);
+    File f = File(path);
+    await f.create();
+    await f.writeAsString(pathStr);
+    return true;
   }
 
   Future<void> run(
@@ -349,6 +378,7 @@ class PainteAnt extends MapPainter {
   final List<List<int>> _antsPos;
   final int _anti;
   final bool _isShowAnts;
+  final bool _isShowAxis;
   final String _state;
   final int _animationForShowAntsi;
   PainteAnt(
@@ -363,6 +393,7 @@ class PainteAnt extends MapPainter {
     this._antsPos,
     this._anti,
     this._isShowAnts,
+    this._isShowAxis,
     this._state,
     this._animationForShowAntsi,
   ) : super(_myMap, _visualPoints);
@@ -378,7 +409,7 @@ class PainteAnt extends MapPainter {
     Paint myPaint = Paint()..color = Colors.black;
     //super.drawName(canvas, size, myPaint, k);
     super.drawBarriers(canvas, size, myPaint, k);
-    //drawAxis(canvas, size, myPaint, k);
+    if (_isShowAxis) drawAxis(canvas, size, myPaint, k);
     drawPhermone(canvas, size, myPaint, k);
     if (_isShowOp)
       super.drawPathRoute(canvas, size, myPaint, k, _pathRouteOp, Colors.green,

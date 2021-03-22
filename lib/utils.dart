@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' show Random;
 
 final GlobalKey showMapKey = GlobalKey();
@@ -80,4 +81,22 @@ T randomChoice<T>(Iterable<T> options, [Iterable<double> weights = const []]) {
   }
 
   return options.elementAt(i);
+}
+
+void showSnakBar(BuildContext context, String s) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        s,
+        style: GoogleFonts.jua(
+          textStyle: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+          ),
+        ),
+      ),
+      duration: Duration(milliseconds: 100),
+      backgroundColor: Colors.grey,
+    ),
+  );
 }

@@ -69,7 +69,7 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                   ),
                 ),
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.4,
+                  height: MediaQuery.of(context).size.height * 0.3,
                   margin: EdgeInsets.symmetric(vertical: 10),
                   child: ListView(
                     shrinkWrap: true,
@@ -127,50 +127,72 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                   ),
                 ),
                 ShowPathDistance(key: showPathDiatance),
-                MySwitchButton(false, 'Ant Colony', '过滤', 0),
-                MySwitchButton(false, 'Ant Colony', '显示蚂蚁', 1),
+                Column(
+                  children: [
+                    MySwitchButton(false, 'Ant Colony', '过滤', 0),
+                    MySwitchButton(false, 'Ant Colony', '显示蚂蚁', 1),
+                    MySwitchButton(false, 'Ant Colony', '显示坐标', 2),
+                  ],
+                ),
                 MySlider('Ant Colony'),
-                MyButton(
-                  () {
-                    _focusNodeIteration.unfocus();
-                    _focusNodeInitPathPheromone.unfocus();
-                    _focusNodeAntPheromone.unfocus();
-                    _focusNodeP.unfocus();
-                    _focusNodeB.unfocus();
-                    _focusNodeA.unfocus();
-                    _focusNodeAntsNum.unfocus();
-                    (showMapKeyForAnt.currentState as ShowMapForAntState).run(
-                      int.parse(
-                        _controllerAntsNum.text.isEmpty
-                            ? '10'
-                            : _controllerAntsNum.text,
-                      ),
-                      double.parse(
-                        _controllerA.text.isEmpty ? '1.0' : _controllerA.text,
-                      ),
-                      double.parse(
-                        _controllerB.text.isEmpty ? '0.2' : _controllerB.text,
-                      ),
-                      double.parse(
-                        _controllerP.text.isEmpty ? '0.8' : _controllerP.text,
-                      ),
-                      double.parse(
-                        _controllerAntPheromone.text.isEmpty
-                            ? '50'
-                            : _controllerAntPheromone.text,
-                      ),
-                      double.parse(
-                        _controllerInitPathPheromone.text.isEmpty
-                            ? '1.0'
-                            : _controllerInitPathPheromone.text,
-                      ),
-                      int.parse(
-                        _controllerIteration.text.isEmpty
-                            ? '20'
-                            : _controllerIteration.text,
-                      ),
-                    );
-                  },
+                Column(
+                  children: [
+                    MyButton(
+                      () async {
+                        String s = '';
+                        (showMapKeyForAnt.currentState as ShowMapForAntState)
+                            .save('/home/dmr/test.json')
+                            .then((value) =>
+                                value ? s = 'Success' : s = 'Failure')
+                            .onError((error, stackTrace) => s = 'Error')
+                            .whenComplete(
+                              () => showSnakBar(context, s),
+                            );
+                      },
+                      'SAVE',
+                    ),
+                    SizedBox(height: 10),
+                    MyButton(() {
+                      _focusNodeIteration.unfocus();
+                      _focusNodeInitPathPheromone.unfocus();
+                      _focusNodeAntPheromone.unfocus();
+                      _focusNodeP.unfocus();
+                      _focusNodeB.unfocus();
+                      _focusNodeA.unfocus();
+                      _focusNodeAntsNum.unfocus();
+                      (showMapKeyForAnt.currentState as ShowMapForAntState).run(
+                        int.parse(
+                          _controllerAntsNum.text.isEmpty
+                              ? '10'
+                              : _controllerAntsNum.text,
+                        ),
+                        double.parse(
+                          _controllerA.text.isEmpty ? '1.0' : _controllerA.text,
+                        ),
+                        double.parse(
+                          _controllerB.text.isEmpty ? '0.2' : _controllerB.text,
+                        ),
+                        double.parse(
+                          _controllerP.text.isEmpty ? '0.8' : _controllerP.text,
+                        ),
+                        double.parse(
+                          _controllerAntPheromone.text.isEmpty
+                              ? '50'
+                              : _controllerAntPheromone.text,
+                        ),
+                        double.parse(
+                          _controllerInitPathPheromone.text.isEmpty
+                              ? '1.0'
+                              : _controllerInitPathPheromone.text,
+                        ),
+                        int.parse(
+                          _controllerIteration.text.isEmpty
+                              ? '20'
+                              : _controllerIteration.text,
+                        ),
+                      );
+                    }, 'START'),
+                  ],
                 ),
               ],
             ),

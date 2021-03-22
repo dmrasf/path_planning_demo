@@ -71,20 +71,44 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                   ],
                 ),
                 ShowPathDistance(key: showPathDiatance),
-                MySwitchButton(false, 'A*', '过滤', 0),
+                Column(
+                  children: [
+                    MySwitchButton(false, 'A*', '过滤', 0),
+                    MySwitchButton(false, 'A*', '显示坐标', 2),
+                  ],
+                ),
                 MySlider('A*'),
-                MyButton(() {
-                  _focusNodeH.unfocus();
-                  _focusNodeG.unfocus();
-                  (showMapKey.currentState as ShowMapForAState).run(
-                    double.parse(
-                      _controllerH.text.isEmpty ? '1.0' : _controllerH.text,
+                Column(
+                  children: [
+                    MyButton(
+                      () async {
+                        String s = '';
+                        (showMapKey.currentState as ShowMapForAState)
+                            .save('/home/dmr/test.json')
+                            .then((value) =>
+                                value ? s = 'Success' : s = 'Failure')
+                            .onError((error, stackTrace) => s = 'Error')
+                            .whenComplete(
+                              () => showSnakBar(context, s),
+                            );
+                      },
+                      'SAVE',
                     ),
-                    double.parse(
-                      _controllerG.text.isEmpty ? '1.0' : _controllerG.text,
-                    ),
-                  );
-                }),
+                    SizedBox(height: 10),
+                    MyButton(() {
+                      _focusNodeH.unfocus();
+                      _focusNodeG.unfocus();
+                      (showMapKey.currentState as ShowMapForAState).run(
+                        double.parse(
+                          _controllerH.text.isEmpty ? '1.0' : _controllerH.text,
+                        ),
+                        double.parse(
+                          _controllerG.text.isEmpty ? '1.0' : _controllerG.text,
+                        ),
+                      );
+                    }, 'START'),
+                  ],
+                ),
               ],
             ),
           ),
