@@ -201,17 +201,19 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   void _parseFinalRoute() {
     _pathRoute = [0];
     while (true) {
-      List<double> sortPath = List.from(
-        _pathPhermonone[_pathRoute[_pathRoute.length - 1]],
+      List<double> sortPath = List.generate(
+        _visualPoints.length,
+        (index) => _calculateProbability(
+          _pathRoute[_pathRoute.length - 1],
+          index,
+        ),
       );
+      List<double> tmp = List.from(sortPath);
       sortPath.sort((l, r) => r.compareTo(l));
       bool isDone = false;
       for (double p in sortPath) {
-        int i = _pathPhermonone[_pathRoute[_pathRoute.length - 1]].indexWhere(
-          (e) => e == p,
-        );
-        if (!_pathRoute.contains(i) &&
-            _pathPhermonone[_pathRoute[_pathRoute.length - 1]][i] != 0) {
+        int i = tmp.indexWhere((e) => e == p);
+        if (!_pathRoute.contains(i)) {
           _pathRoute.add(i);
           isDone = true;
           break;
