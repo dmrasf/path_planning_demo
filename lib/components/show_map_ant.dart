@@ -524,7 +524,7 @@ class PainteAnt extends MapPainter {
             k *
             (mxP > 10 ? 10 : mxP);
         myPaint
-          ..strokeWidth = width
+          ..strokeWidth = width < 0.01 ? 0.05 : width
           ..strokeCap = StrokeCap.round;
         canvas.drawLine(p1, p2, myPaint);
       }

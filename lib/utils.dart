@@ -100,3 +100,37 @@ void showSnakBar(BuildContext context, String s) {
     ),
   );
 }
+
+void fadeChangePage(BuildContext context, Widget widget) {
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => widget,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+          FadeTransition(
+        opacity: animation.drive(
+          Tween(begin: 0.0, end: 1.0).chain(
+            CurveTween(curve: Curves.ease),
+          ),
+        ),
+        child: child,
+      ),
+    ),
+  );
+}
+
+void slideChangePage(BuildContext context, Widget widget) {
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => widget,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+          SlideTransition(
+        position: animation.drive(
+          Tween(begin: Offset(0, 1), end: Offset(0, 0)).chain(
+            CurveTween(curve: Curves.ease),
+          ),
+        ),
+        child: child,
+      ),
+    ),
+  );
+}

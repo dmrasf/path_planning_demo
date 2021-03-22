@@ -26,32 +26,41 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
               () => pickFile('json').then(
                 (fileName) {
                   if (fileName != null && fileName != '')
-                    Navigator.of(context).push(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            MapShow(widget.algorithmName, fileName),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) =>
-                                FadeTransition(
-                          opacity: animation.drive(
-                            Tween(begin: 0.0, end: 1.0).chain(
-                              CurveTween(curve: Curves.ease),
-                            ),
-                          ),
-                          child: child,
-                        ),
-                      ),
+                    fadeChangePage(
+                      context,
+                      MapShow(widget.algorithmName, fileName),
                     );
                 },
               ),
               'Pick map file',
             ),
             SizedBox(height: 30),
-            MyShowMapButton(() {}, 'Create map file'),
+            MyShowMapButton(
+              () => fadeChangePage(context, CreateMap()),
+              'Create map file',
+            ),
           ],
         ),
       ),
       //body: showMap(),
+    );
+  }
+}
+
+class CreateMap extends StatefulWidget {
+  @override
+  _CreateMapState createState() => _CreateMapState();
+}
+
+class _CreateMapState extends State<CreateMap> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Create Map'),
+        centerTitle: true,
+      ),
+      body: Container(),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_planning/pages/algorithm_show.dart';
+import 'package:path_planning/utils.dart';
 
 class AlgorithmCard extends StatefulWidget {
   final String algorithmName;
@@ -19,25 +20,10 @@ class _AlgorithmCardState extends State<AlgorithmCard> {
     _height = MediaQuery.of(this.context).size.height * 0.30;
     _width = MediaQuery.of(this.context).size.width * 0.35;
     return TextButton(
-      onPressed: () {
-        Navigator.of(context).push(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                AlgorithmShow(widget.algorithmName),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              return FadeTransition(
-                opacity: animation.drive(
-                  Tween(begin: 0.0, end: 1.0).chain(
-                    CurveTween(curve: Curves.ease),
-                  ),
-                ),
-                child: child,
-              );
-            },
-          ),
-        );
-      },
+      onPressed: () => fadeChangePage(
+        context,
+        AlgorithmShow(widget.algorithmName),
+      ),
       child: Text(widget.algorithmName + ' Algorithm'),
       style: ButtonStyle(
         animationDuration: Duration(milliseconds: 200),
