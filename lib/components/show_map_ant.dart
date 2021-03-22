@@ -27,14 +27,13 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   List<List<double>> _pathPhermonone = [];
   int _speed = 300;
   double _initPathPhermononeValue = 1;
-  int _iterationNum = 20;
+  int _iterationNum = 200;
   double _a = 1;
-  double _b = 0.2;
+  double _b = 0.1;
   double _p = 0.8;
   double _antPheromone = 50;
-  int _antsNum = 1;
+  int _antsNum = 100;
   List<List<int>> _antsPos = [];
-  List<bool> _antsPosChange = [];
   List<int> _pathRoute = [];
   List<int> _pathRouteOp = [];
   bool _isShowOp = false;
@@ -165,7 +164,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     int iteration,
   ) async {
     if (!_isDone) return;
-    _antsNum = antsNum;
+    _antsNum = antsNum < 1 ? 1 : antsNum;
     _a = a;
     _b = b;
     _p = p;
@@ -270,16 +269,24 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   }
 
   void _setAntsPosition() {
-    _antsPos = [];
-    for (int i = 0; i < _antsNum; i++) {
+    _antsPos = [
+      [0]
+    ];
+    for (int i = 1; i < _antsNum; i++) {
       _antsPos.add([0]);
-      _antsPosChange.add(false);
+      //_antsPos.add([Random().nextInt(_visualPoints.length - 2)]);
     }
   }
 
   double _calculateProbability(int p1, int p2) {
     if (_visualGraph[p1][p2] == 0 || _visualGraph[p1][p2] == -1) return 0;
-    return pow(_pathPhermonone[p1][p2], _a) * pow(1 / _visualGraph[p1][p2], _b);
+    double pathDistance = pow(
+      pow((_visualPoints[p1][0] - _visualPoints[p2][0]) * _myMap['grid'], 2) +
+          pow((_visualPoints[p1][1] - _visualPoints[p2][1]) * _myMap['grid'],
+              2),
+      0.5,
+    );
+    return pow(_pathPhermonone[p1][p2], _a) * pow(pathDistance, _b);
   }
 
   Future<bool> _selectNextPosForAnts() async {
@@ -296,6 +303,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
         _visualPoints.length,
         (index) => index,
       );
+      pointToSelected.remove(0);
       for (int pos in antPath) pointToSelected.remove(pos);
       List<double> probabilities =
           pointToSelected.map((i) => i.toDouble()).toList();
@@ -511,8 +519,10 @@ class PainteAnt extends MapPainter {
                 (size.width - k * (super.width / super.grid)) / 2,
             _visualPoints[j][0].toDouble() * k +
                 (size.height - k * (super.heigth / super.grid)) / 2);
-        double width =
-            (_pathPhermonone[i][j] - miP) / (mxP - miP) * 5.5 * k * mxP / 20;
+        double width = (_pathPhermonone[i][j] - miP) /
+            (mxP - miP) *
+            k *
+            (mxP > 10 ? 10 : mxP);
         myPaint
           ..strokeWidth = width
           ..strokeCap = StrokeCap.round;

@@ -36,13 +36,13 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
 
   @override
   void initState() {
-    _controllerAntsNum.text = "10";
+    _controllerAntsNum.text = "100";
     _controllerA.text = "1";
-    _controllerB.text = "0.2";
+    _controllerB.text = "0.1";
     _controllerP.text = "0.8";
     _controllerAntPheromone.text = "50";
     _controllerInitPathPheromone.text = "1";
-    _controllerIteration.text = "20";
+    _controllerIteration.text = "200";
     super.initState();
   }
 

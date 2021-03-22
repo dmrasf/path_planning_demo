@@ -9,16 +9,19 @@ class ShowPathDistance extends StatefulWidget {
 }
 
 class ShowPathDistanceState extends State<ShowPathDistance> {
-  String _text = '0.00 m';
+  String _text = '0.00';
+  Color _color = Colors.black;
+  String _icon = '';
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10),
       child: Text(
-        _text,
+        _text + ' m ' + _icon,
         style: GoogleFonts.syncopate(
           textStyle: TextStyle(
             fontSize: 23,
+            color: _color,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -28,7 +31,17 @@ class ShowPathDistanceState extends State<ShowPathDistance> {
 
   void update(String newString) {
     setState(() {
-      _text = newString + ' m';
+      if (num.parse(_text) > num.parse(newString)) {
+        _color = Colors.green;
+        _icon = '';
+      } else if (num.parse(_text) < num.parse(newString)) {
+        _color = Colors.red;
+        _icon = '';
+      } else {
+        _color = Colors.black;
+        _icon = '';
+      }
+      _text = newString;
     });
   }
 }
