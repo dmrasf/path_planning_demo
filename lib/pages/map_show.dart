@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_planning/components/controll_and_show_map_a.dart';
 import 'package:path_planning/components/controll_and_show_map_ant.dart';
+import 'package:path_planning/components/controll_and_show_map_rrt.dart';
 
 class MapShow extends StatelessWidget {
   final String _algorithmName;
@@ -27,7 +28,9 @@ class MapShow extends StatelessWidget {
                     child: Text(
                       _algorithmName == 'A*'
                           ? 'H: 待选点到终点距离权重\nG: 当前点到待选点距离权重\nf = h + g'
-                          : 'a: 信息素权重\nb: 路径长度权重\np: 信息素挥发率(0, 1)',
+                          : _algorithmName == 'RRT*'
+                              ? 'RRT'
+                              : 'a: 信息素权重\nb: 路径长度权重\np: 信息素挥发率(0, 1)',
                       style: GoogleFonts.k2d(
                         textStyle: TextStyle(
                           fontSize: 15,
@@ -58,7 +61,9 @@ class MapShow extends StatelessWidget {
       ),
       body: _algorithmName == 'A*'
           ? ControllAndShowMapForA(_fileName)
-          : ControllAndShowMapForAnt(_fileName),
+          : _algorithmName == 'RRT*'
+              ? ControllAndShowMapForRRT(_fileName)
+              : ControllAndShowMapForAnt(_fileName),
     );
   }
 }

@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' show Random;
 
-final GlobalKey showMapKey = GlobalKey();
+final GlobalKey showMapKeyForA = GlobalKey();
 final GlobalKey showMapKeyForAnt = GlobalKey();
+final GlobalKey showMapKeyForRRT = GlobalKey();
 final GlobalKey showPathDiatance = GlobalKey();
+
+enum SwitchType { Op, Axis, Ants }
 
 Future<String> pickFile(String extension) async {
   bool _noExtension = false;

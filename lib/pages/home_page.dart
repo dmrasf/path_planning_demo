@@ -54,12 +54,23 @@ class HomePage extends StatelessWidget {
             ),
           ),
           Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              AlgorithmCard('A*'),
-              AlgorithmCard('Ant Colony'),
-            ],
+          Container(
+            height: MediaQuery.of(context).size.height * 0.37,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(vertical: 20),
+              physics: BouncingScrollPhysics(),
+              shrinkWrap: true,
+              children: <Widget>[
+                SizedBox(width: 30),
+                AlgorithmCard('A*'),
+                SizedBox(width: 30),
+                AlgorithmCard('Ant Colony'),
+                SizedBox(width: 30),
+                AlgorithmCard('RRT*'),
+                SizedBox(width: 30),
+              ],
+            ),
           ),
           Spacer(),
         ],

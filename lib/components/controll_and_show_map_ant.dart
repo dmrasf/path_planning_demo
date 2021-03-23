@@ -129,9 +129,11 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                 ShowPathDistance(key: showPathDiatance),
                 Column(
                   children: [
-                    MySwitchButton(false, 'Ant Colony', '过滤', 0),
-                    MySwitchButton(false, 'Ant Colony', '显示蚂蚁', 1),
-                    MySwitchButton(false, 'Ant Colony', '显示坐标', 2),
+                    MySwitchButton(false, 'Ant Colony', '过滤', SwitchType.Op),
+                    MySwitchButton(
+                        false, 'Ant Colony', '显示蚂蚁', SwitchType.Ants),
+                    MySwitchButton(
+                        false, 'Ant Colony', '显示坐标', SwitchType.Axis),
                   ],
                 ),
                 MySlider('Ant Colony'),

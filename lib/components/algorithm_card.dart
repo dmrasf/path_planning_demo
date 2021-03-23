@@ -24,7 +24,7 @@ class _AlgorithmCardState extends State<AlgorithmCard> {
         context,
         AlgorithmShow(widget.algorithmName),
       ),
-      child: Text(widget.algorithmName + ' Algorithm'),
+      child: Text(widget.algorithmName),
       style: ButtonStyle(
         animationDuration: Duration(milliseconds: 200),
         padding: MaterialStateProperty.all(EdgeInsets.all(20)),

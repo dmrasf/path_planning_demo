@@ -73,8 +73,8 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                 ShowPathDistance(key: showPathDiatance),
                 Column(
                   children: [
-                    MySwitchButton(false, 'A*', '过滤', 0),
-                    MySwitchButton(false, 'A*', '显示坐标', 2),
+                    MySwitchButton(false, 'A*', '过滤', SwitchType.Op),
+                    MySwitchButton(false, 'A*', '显示坐标', SwitchType.Axis),
                   ],
                 ),
                 MySlider('A*'),
@@ -83,7 +83,7 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                     MyButton(
                       () async {
                         String s = '';
-                        (showMapKey.currentState as ShowMapForAState)
+                        (showMapKeyForA.currentState as ShowMapForAState)
                             .save('/home/dmr/test.json')
                             .then((value) =>
                                 value ? s = 'Success' : s = 'Failure')
@@ -98,7 +98,7 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                     MyButton(() {
                       _focusNodeH.unfocus();
                       _focusNodeG.unfocus();
-                      (showMapKey.currentState as ShowMapForAState).run(
+                      (showMapKeyForA.currentState as ShowMapForAState).run(
                         double.parse(
                           _controllerH.text.isEmpty ? '1.0' : _controllerH.text,
                         ),
@@ -124,7 +124,7 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
           child: Container(
             height: double.infinity,
             padding: EdgeInsets.all(15),
-            child: ShowMapForA(key: showMapKey, fileName: widget._fileName),
+            child: ShowMapForA(key: showMapKeyForA, fileName: widget._fileName),
           ),
         ),
       ],
