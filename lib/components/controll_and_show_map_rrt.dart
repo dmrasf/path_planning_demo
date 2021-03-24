@@ -18,7 +18,18 @@ class ControllAndShowMapForRRT extends StatefulWidget {
 }
 
 class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
-  bool _isShow = true;
+  TextEditingController _controllerR = TextEditingController();
+  TextEditingController _controllerI = TextEditingController();
+  FocusNode _focusNodeR = FocusNode();
+  FocusNode _focusNodeI = FocusNode();
+  bool _isShow = false;
+
+  @override
+  void initState() {
+    _controllerR.text = '10';
+    _controllerI.text = '10000';
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +54,22 @@ class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
                   ),
                 ),
                 Column(
-                  children: [],
+                  children: [
+                    MyTextField(
+                      this._controllerR,
+                      this._focusNodeR,
+                      '半径',
+                      'double',
+                      r'^\d+[\.\d]?\d*$',
+                    ),
+                    MyTextField(
+                      this._controllerI,
+                      this._focusNodeI,
+                      '次数',
+                      'double',
+                      r'^\d+[\.\d]?\d*$',
+                    ),
+                  ],
                 ),
                 ShowPathDistance(key: showPathDiatance),
                 Column(
@@ -55,11 +81,29 @@ class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
                 MySlider('RRT*'),
                 Column(
                   children: [
-                    MyButton(() {}, 'SAVE'),
+                    MyButton(() {
+                      String s = '';
+                      (showMapKeyForRRT.currentState as ShowMapForRRTState)
+                          .save('/home/dmr/test.json')
+                          .then(
+                              (value) => value ? s = 'Success' : s = 'Failure')
+                          .onError((error, stackTrace) => s = 'Error')
+                          .whenComplete(
+                            () => showSnakBar(context, s),
+                          );
+                    }, 'SAVE'),
                     SizedBox(height: 10),
                     MyButton(() {
-                      (showMapKeyForRRT.currentState as ShowMapForRRTState)
-                          .run();
+                      _focusNodeR.unfocus();
+                      _focusNodeI.unfocus();
+                      (showMapKeyForRRT.currentState as ShowMapForRRTState).run(
+                        double.parse(
+                          _controllerR.text.isEmpty ? '1.0' : _controllerR.text,
+                        ),
+                        int.parse(
+                          _controllerI.text.isEmpty ? '1.0' : _controllerI.text,
+                        ),
+                      );
                     }, 'START'),
                   ],
                 ),
@@ -69,6 +113,8 @@ class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
         ),
         ToggleButton(
           () => setState(() {
+            _focusNodeR.unfocus();
+            _focusNodeI.unfocus();
             _isShow = !_isShow;
           }),
           _isShow,

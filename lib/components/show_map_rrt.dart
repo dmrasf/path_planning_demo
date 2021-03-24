@@ -108,7 +108,30 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     );
   }
 
-  void run() async {
+  Future<bool> save(String path) async {
+    if (_pathRouteOp.isEmpty) return false;
+    double grid = _myMap['grid'].toDouble();
+    List<dynamic> start = _myMap['start'];
+    List<dynamic> end = _myMap['end'];
+    List<List<dynamic>> realPath = [start];
+    for (int i = 1; i < _pathRouteOp.length - 1; i++)
+      realPath.add([
+        (num.parse(
+          (_visualPoints[_pathRouteOp[i]][0] * grid).toStringAsFixed(2),
+        )),
+        (num.parse(
+          (_visualPoints[_pathRouteOp[i]][1] * grid).toStringAsFixed(2),
+        ))
+      ]);
+    realPath.add(end);
+    String pathStr = jsonEncode(realPath);
+    File f = File(path);
+    await f.create();
+    await f.writeAsString(pathStr);
+    return true;
+  }
+
+  void run(double radius, int iterationNum) async {
     if (!_isDone) return;
     _controller.reset();
     _controller.forward();

@@ -61,6 +61,7 @@ class MapPainter extends CustomPainter {
             pathRoute[pathRoute.length - 1] != 0)) return;
     myPaint
       ..color = lineColor
+      ..strokeCap = StrokeCap.round
       ..strokeWidth = k * 4;
     final TextPainter tp = TextPainter(
       textAlign: TextAlign.center,
