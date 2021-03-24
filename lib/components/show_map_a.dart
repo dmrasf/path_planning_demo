@@ -220,16 +220,7 @@ class ShowMapForAState extends State<ShowMapForA>
     else
       tmp = List.from(_pathRoute);
     for (int i = 0; i < tmp.length - 1; i++) {
-      pathDistance += pow(
-          pow(
-                  (_visualPoints[tmp[i]][0] - _visualPoints[tmp[i + 1]][0]) *
-                      _myMap['grid'],
-                  2) +
-              pow(
-                  (_visualPoints[tmp[i]][1] - _visualPoints[tmp[i + 1]][1]) *
-                      _myMap['grid'],
-                  2),
-          0.5);
+      pathDistance += _visualGraph[tmp[i]][tmp[i + 1]];
     }
     return pathDistance;
   }
@@ -253,21 +244,7 @@ class ShowMapForAState extends State<ShowMapForA>
                 2),
         0.5,
       );
-      double g = pow(
-        pow(
-              (_visualPoints[currentPoint[0]][0] -
-                      _visualPoints[tmpPoints[0]][0]) *
-                  grid,
-              2,
-            ) +
-            pow(
-              (_visualPoints[currentPoint[0]][1] -
-                      _visualPoints[tmpPoints[0]][1]) *
-                  grid,
-              2,
-            ),
-        0.5,
-      );
+      double g = _visualGraph[currentPoint[0]][tmpPoints[0]];
       double f =
           h * (hWeight == 0 ? 1 : hWeight) + g * (gWeight == 0 ? 1 : gWeight);
       _openPointsValue.add(f);

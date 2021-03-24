@@ -212,16 +212,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     else
       tmp = List.from(_pathRoute);
     for (int i = 0; i < tmp.length - 1; i++) {
-      pathDistance += pow(
-          pow(
-                  (_visualPoints[tmp[i]][0] - _visualPoints[tmp[i + 1]][0]) *
-                      _myMap['grid'],
-                  2) +
-              pow(
-                  (_visualPoints[tmp[i]][1] - _visualPoints[tmp[i + 1]][1]) *
-                      _myMap['grid'],
-                  2),
-          0.5);
+      pathDistance += _visualGraph[tmp[i]][tmp[i + 1]];
     }
     return pathDistance;
   }
@@ -280,12 +271,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   double _calculateProbability(int p1, int p2) {
     if (_visualGraph[p1][p2] == 0 || _visualGraph[p1][p2] == -1) return 0;
-    double pathDistance = pow(
-      pow((_visualPoints[p1][0] - _visualPoints[p2][0]) * _myMap['grid'], 2) +
-          pow((_visualPoints[p1][1] - _visualPoints[p2][1]) * _myMap['grid'],
-              2),
-      0.5,
-    );
+    double pathDistance = _visualGraph[p1][p2];
     return pow(_pathPhermonone[p1][p2], _a) * pow(pathDistance, _b);
   }
 

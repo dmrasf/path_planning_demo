@@ -18,6 +18,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     with SingleTickerProviderStateMixin {
   bool _isDone = false;
   Map<String, dynamic> _myMap;
+  double _grid;
   AnimationController _controller;
   List<dynamic> _visualPoints = [];
   List<dynamic> _visualGraph;
@@ -34,6 +35,10 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
   Set _closePoints = Set();
   Map<int, double> _pointToStartDis = Map<int, double>();
   int _i = 0;
+  double _rate = 0.5;
+  double _radius = 3;
+  Set _nearPoint = Set();
+  Set _openPoints = Set();
 
   @override
   void initState() {
@@ -68,6 +73,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
                   this._state,
                   this._tree,
                   this._i,
+                  this._radius,
                 ),
               );
             },
@@ -84,6 +90,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
       Map<String, dynamic> tmpPoints = jsonDecode(visualPointStr);
       _visualPoints = tmpPoints['visual_points'];
       _visualGraph = tmpPoints['visual_graph'];
+      _grid = _myMap['grid'].toDouble();
       _isDone = true;
     } catch (e) {
       await Future.delayed(Duration(milliseconds: 500));
@@ -131,16 +138,34 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     return true;
   }
 
+  void getNearPoints() {
+    dynamic end = _visualPoints[_visualPoints.length - 1];
+    _nearPoint.clear();
+    for (int i = 0; i < _visualPoints.length - 1; i++) {
+      if (_visualGraph[_visualPoints.length - 1][i] <= _radius)
+        _nearPoint.add(i);
+    }
+  }
+
+  void updateOpenPoints(int newPoint) {
+    for (int i = 0; i < _visualPoints.length; i++) {
+      if (_visualGraph[newPoint][i] > 0) _openPoints.add(i);
+    }
+  }
+
   void run(double radius, int iterationNum) async {
     if (!_isDone) return;
     _controller.reset();
     _controller.forward();
+    _radius = radius;
     _pathRoute = [];
     _pathRouteOp = [];
     _tree.clear();
     _closePoints = Set.from([0]);
+    updateOpenPoints(0);
     _i = 0;
     _pointToStartDis.clear();
+    getNearPoints();
     int i = 0;
     for (; i < _iterationNum; i++) {
       int xRand = _getRandomPoint();
@@ -179,16 +204,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     else
       tmp = List.from(_pathRoute);
     for (int i = 0; i < tmp.length - 1; i++) {
-      pathDistance += pow(
-          pow(
-                  (_visualPoints[tmp[i]][0] - _visualPoints[tmp[i + 1]][0]) *
-                      _myMap['grid'],
-                  2) +
-              pow(
-                  (_visualPoints[tmp[i]][1] - _visualPoints[tmp[i + 1]][1]) *
-                      _myMap['grid'],
-                  2),
-          0.5);
+      pathDistance += _visualGraph[tmp[i]][tmp[i + 1]];
     }
     return pathDistance;
   }
@@ -224,13 +240,15 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
   }
 
   bool _isArrived(int xNew) {
-    if (_visualGraph[xNew][_visualPoints.length - 1] > 0) return true;
+    double dis = _visualGraph[xNew][_visualPoints.length - 1];
+    if (dis > 0) return true;
     return false;
   }
 
   void _addNewBranch(int xNew, int xNear) {
     _tree[xNew] = xNear;
     _closePoints.add(xNew);
+    updateOpenPoints(xNew);
   }
 
   void _changeParent(int xNew) {
@@ -247,6 +265,9 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
   }
 
   int _getRandomPoint() {
+    double r = Random().nextDouble();
+    if (r > _rate) {
+    } else {}
     while (true) {
       int i = Random().nextInt(_visualPoints.length - 1) + 1;
       if (!_closePoints.contains(i)) return i;
@@ -290,6 +311,7 @@ class PainteRRT extends MapPainter {
   final bool _isShowAxis;
   final Map<int, int> _tree;
   final int _i;
+  final double _radius;
   PainteRRT(
     _myMap,
     this._visualPoints,
@@ -300,6 +322,7 @@ class PainteRRT extends MapPainter {
     this._state,
     this._tree,
     this._i,
+    this._radius,
   ) : super(_myMap, _visualPoints);
 
   @override
@@ -322,7 +345,24 @@ class PainteRRT extends MapPainter {
           Colors.orange.shade900, _i + 1);
     drawTree(canvas, size, myPaint, k);
     super.drawRobot(canvas, size, myPaint, k);
+    drawRadius(canvas, size, myPaint, k);
     super.drawState(canvas, size, myPaint, k, _state);
+  }
+
+  void drawRadius(Canvas canvas, Size size, Paint myPaint, double k) {
+    double minY = (size.height - k * (super.heigth / super.grid)) / 2;
+    double maxY = super.heigth / super.grid * k + minY;
+    double mPp = (maxY - minY) / super.heigth;
+    myPaint..color = Colors.red.withOpacity(0.3);
+    canvas.drawCircle(
+      Offset(
+          _visualPoints[_visualPoints.length - 1][1].toDouble() * k +
+              (size.width - k * (super.width / super.grid)) / 2,
+          _visualPoints[_visualPoints.length - 1][0].toDouble() * k +
+              (size.height - k * (super.heigth / super.grid)) / 2),
+      _radius * mPp,
+      myPaint,
+    );
   }
 
   void drawTree(Canvas canvas, Size size, Paint myPaint, double k) {

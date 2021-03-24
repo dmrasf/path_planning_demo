@@ -29,7 +29,7 @@ class MapShow extends StatelessWidget {
                       _algorithmName == 'A*'
                           ? 'H: 待选点到终点距离权重\nG: 当前点到待选点距离权重\nf = h + g'
                           : _algorithmName == 'RRT*'
-                              ? 'RRT'
+                              ? 'r: 半径\ni: 迭代次数'
                               : 'a: 信息素权重\nb: 路径长度权重\np: 信息素挥发率(0, 1)',
                       style: GoogleFonts.k2d(
                         textStyle: TextStyle(

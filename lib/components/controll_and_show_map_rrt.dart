@@ -26,7 +26,7 @@ class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
 
   @override
   void initState() {
-    _controllerR.text = '10';
+    _controllerR.text = '3';
     _controllerI.text = '10000';
     super.initState();
   }
