@@ -138,16 +138,19 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     return true;
   }
 
-  void getNearPoints() {
-    dynamic end = _visualPoints[_visualPoints.length - 1];
-    _nearPoint.clear();
+  void _getNearRadiusPoints() {
+    int end = _visualPoints.length - 1;
     for (int i = 0; i < _visualPoints.length - 1; i++) {
-      if (_visualGraph[_visualPoints.length - 1][i] <= _radius)
-        _nearPoint.add(i);
+      double dis = pow(
+        pow((_visualPoints[end][0] - _visualPoints[i][0]) * _grid, 2) +
+            pow((_visualPoints[end][1] - _visualPoints[i][1]) * _grid, 2),
+        0.5,
+      );
+      if (dis <= _radius) _nearPoint.add(i);
     }
   }
 
-  void updateOpenPoints(int newPoint) {
+  void _updateOpenPoints(int newPoint) {
     for (int i = 0; i < _visualPoints.length; i++) {
       if (_visualGraph[newPoint][i] > 0) _openPoints.add(i);
     }
@@ -162,13 +165,17 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     _pathRouteOp = [];
     _tree.clear();
     _closePoints = Set.from([0]);
-    updateOpenPoints(0);
+    _openPoints.clear();
+    _updateOpenPoints(0);
     _i = 0;
     _pointToStartDis.clear();
-    getNearPoints();
+    _nearPoint.clear();
+    _getNearRadiusPoints();
     int i = 0;
     for (; i < _iterationNum; i++) {
       int xRand = _getRandomPoint();
+      print('xRand = $xRand');
+      if (xRand == -1) break;
       int xNear = _findNearPoint(xRand);
       if (xNear == -1) continue;
       int xNew = xRand;
@@ -248,7 +255,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
   void _addNewBranch(int xNew, int xNear) {
     _tree[xNew] = xNear;
     _closePoints.add(xNew);
-    updateOpenPoints(xNew);
+    _updateOpenPoints(xNew);
   }
 
   void _changeParent(int xNew) {
@@ -265,6 +272,18 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
   }
 
   int _getRandomPoint() {
+    //Set choiceOther = _openPoints.difference(_nearPoint);
+    //Set choiceRadius = _openPoints.intersection(_nearPoint);
+    //if (choiceRadius.isNotEmpty) {
+    //int i = Random().nextInt(choiceRadius.length);
+    //return choiceRadius.toList()[i];
+    //} else if (choiceOther.isNotEmpty) {
+    //int i = Random().nextInt(choiceOther.length);
+    //return choiceOther.toList()[i];
+    //} else {
+    //return -1;
+    //}
+
     double r = Random().nextDouble();
     if (r > _rate) {
     } else {}
