@@ -209,7 +209,7 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
         Expanded(
           child: Container(
             height: double.infinity,
-            padding: EdgeInsets.all(15),
+            padding: EdgeInsets.all(30),
             child: ShowMapForAnt(
               key: showMapKeyForAnt,
               fileName: widget._fileName,

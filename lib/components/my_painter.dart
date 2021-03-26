@@ -127,47 +127,45 @@ class MapPainter extends CustomPainter {
     double maxY = _heigth / _grid * k + minY;
     double minX = (size.width - k * (_width / _grid)) / 2;
     double maxX = _width / _grid * k + minX;
-    Offset p1 = Offset(minX, maxY);
-    Offset p2 = Offset(maxX, maxY);
+    double mPp = (maxY - minY) / _heigth;
     myPaint
       ..strokeWidth = 1
+      ..color = Colors.grey.withOpacity(0.6)
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(p1, p2, myPaint);
-    p1 = Offset(maxX, minY);
-    p2 = Offset(maxX, maxY);
-    canvas.drawLine(p1, p2, myPaint);
-    double mPp = (maxY - minY) / _heigth;
     TextPainter tp = TextPainter(
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     );
     int m = 0;
+    TextStyle textStyle = GoogleFonts.jua(
+        textStyle: TextStyle(
+      color: Colors.grey.withOpacity(0.9),
+      fontSize: k * 8,
+    ));
     for (double i = minX; i <= maxX; i += mPp) {
+      canvas.drawLine(Offset(i, minY), Offset(i, maxY), myPaint);
       canvas.drawCircle(Offset(i, maxY), 2, myPaint);
       tp
         ..text = TextSpan(
           text: m.toString(),
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 14,
-          ),
+          style: textStyle,
         );
       tp.layout();
+      if (i == maxX) continue;
       tp.paint(canvas, Offset(i, maxY));
       m++;
     }
     m = 0;
     for (double i = minY; i <= maxY; i += mPp) {
+      canvas.drawLine(Offset(minX, i), Offset(maxX, i), myPaint);
       canvas.drawCircle(Offset(maxX, i), 2, myPaint);
       tp
         ..text = TextSpan(
           text: m.toString(),
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 14,
-          ),
+          style: textStyle,
         );
       tp.layout();
+      if (i == maxY) continue;
       tp.paint(canvas, Offset(maxX, i));
       m++;
     }

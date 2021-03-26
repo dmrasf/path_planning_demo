@@ -124,7 +124,7 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
         Expanded(
           child: Container(
             height: double.infinity,
-            padding: EdgeInsets.all(15),
+            padding: EdgeInsets.all(30),
             child: ShowMapForA(key: showMapKeyForA, fileName: widget._fileName),
           ),
         ),

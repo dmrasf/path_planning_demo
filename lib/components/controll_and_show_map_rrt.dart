@@ -122,7 +122,7 @@ class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
         Expanded(
           child: Container(
             height: double.infinity,
-            padding: EdgeInsets.all(15),
+            padding: EdgeInsets.all(30),
             child: ShowMapForRRT(
               key: showMapKeyForRRT,
               fileName: widget._fileName,
