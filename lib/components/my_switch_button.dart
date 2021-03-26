@@ -35,30 +35,41 @@ class _MySwitchButtonState extends State<MySwitchButton> {
             setState(() {
               _value = newValue;
             });
-            if (widget._type == SwitchType.Op) {
-              if (widget._algorithmName == 'A*')
-                (showMapKeyForA.currentState as ShowMapForAState)
-                    .toggleShowOp(newValue);
-              else if (widget._algorithmName == 'Ant Colony')
-                (showMapKeyForAnt.currentState as ShowMapForAntState)
-                    .toggleShowOp(newValue);
-              else if (widget._algorithmName == 'RRT*')
-                (showMapKeyForRRT.currentState as ShowMapForRRTState)
-                    .toggleShowOp(newValue);
-            } else if (widget._type == SwitchType.Ants) {
-              if (widget._algorithmName == 'Ant Colony')
-                (showMapKeyForAnt.currentState as ShowMapForAntState)
-                    .toggleShowAnts(newValue);
-            } else if (widget._type == SwitchType.Axis) {
-              if (widget._algorithmName == 'A*')
-                (showMapKeyForA.currentState as ShowMapForAState)
-                    .toggleShowAxis(newValue);
-              else if (widget._algorithmName == 'Ant Colony')
-                (showMapKeyForAnt.currentState as ShowMapForAntState)
-                    .toggleShowAxis(newValue);
-              else if (widget._algorithmName == 'RRT*')
-                (showMapKeyForRRT.currentState as ShowMapForRRTState)
-                    .toggleShowAxis(newValue);
+            switch (widget._type) {
+              case SwitchType.Op:
+                if (widget._algorithmName == 'A*')
+                  (showMapKeyForA.currentState as ShowMapForAState)
+                      .toggleShowOp(newValue);
+                else if (widget._algorithmName == 'Ant Colony')
+                  (showMapKeyForAnt.currentState as ShowMapForAntState)
+                      .toggleShowOp(newValue);
+                else if (widget._algorithmName == 'RRT*')
+                  (showMapKeyForRRT.currentState as ShowMapForRRTState)
+                      .toggleShowOp(newValue);
+                break;
+              case SwitchType.Ants:
+                if (widget._algorithmName == 'Ant Colony')
+                  (showMapKeyForAnt.currentState as ShowMapForAntState)
+                      .toggleShowAnts(newValue);
+                break;
+              case SwitchType.Axis:
+                if (widget._algorithmName == 'A*')
+                  (showMapKeyForA.currentState as ShowMapForAState)
+                      .toggleShowAxis(newValue);
+                else if (widget._algorithmName == 'Ant Colony')
+                  (showMapKeyForAnt.currentState as ShowMapForAntState)
+                      .toggleShowAxis(newValue);
+                else if (widget._algorithmName == 'RRT*')
+                  (showMapKeyForRRT.currentState as ShowMapForRRTState)
+                      .toggleShowAxis(newValue);
+                break;
+              case SwitchType.Tree:
+                if (widget._algorithmName == 'A*')
+                  (showMapKeyForA.currentState as ShowMapForAState)
+                      .toggleShowTree(newValue);
+                break;
+              default:
+                break;
             }
           },
         ),

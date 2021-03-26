@@ -8,7 +8,7 @@ final GlobalKey showMapKeyForAnt = GlobalKey();
 final GlobalKey showMapKeyForRRT = GlobalKey();
 final GlobalKey showPathDiatance = GlobalKey();
 
-enum SwitchType { Op, Axis, Ants }
+enum SwitchType { Op, Axis, Ants, Tree }
 
 Future<String> pickFile(String extension) async {
   bool _noExtension = false;

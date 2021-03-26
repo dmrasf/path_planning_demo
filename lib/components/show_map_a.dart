@@ -36,6 +36,7 @@ class ShowMapForAState extends State<ShowMapForA>
   int _i = 0;
   String _state = '';
   bool _isShowAxis = false;
+  bool _isShowTree = false;
 
   @override
   void initState() {
@@ -69,6 +70,7 @@ class ShowMapForAState extends State<ShowMapForA>
                   this._closePoints,
                   this._pathRoute,
                   this._isShowAxis,
+                  this._isShowTree,
                   this._state,
                   this._i,
                 ),
@@ -102,6 +104,10 @@ class ShowMapForAState extends State<ShowMapForA>
 
   void toggleShowAxis(bool isShow) {
     _isShowAxis = isShow;
+  }
+
+  void toggleShowTree(bool isShow) {
+    _isShowTree = isShow;
   }
 
   void toggleShowOp(bool isShow) {
@@ -150,9 +156,10 @@ class ShowMapForAState extends State<ShowMapForA>
     int end = _visualPoints.length - 1;
     int currentPoint = start;
     _closePoints.add(currentPoint);
-
+    List<int> newPoint = [];
     while (true) {
-      _updateOpenPoints(currentPoint);
+      newPoint = _updateOpenPoints(currentPoint);
+      if (_isOp) _changeParent(newPoint);
       currentPoint = _findNextPoint(currentPoint, hWeight, gWeight);
       _state = 'Update close set';
       await Future.delayed(Duration(milliseconds: _speed));
@@ -163,7 +170,11 @@ class ShowMapForAState extends State<ShowMapForA>
       _closePoints.add(currentPoint);
       _state = 'Update open set & Find next positon';
       await Future.delayed(Duration(milliseconds: _speed));
-      if (_tree.containsKey(end)) break;
+      if (_isOp) {
+        if (_tree.containsKey(end)) break;
+      } else {
+        if (_closePoints.contains(end)) break;
+      }
     }
     _state = 'Success !';
     _parsePathRoute();
@@ -214,7 +225,7 @@ class ShowMapForAState extends State<ShowMapForA>
     return bestPoint;
   }
 
-  void _updateOpenPoints(int currentPoint) {
+  List<int> _updateOpenPoints(int currentPoint) {
     List<int> newPoint = [];
     for (int i = 0; i < _visualPoints.length; i++) {
       if (_visualGraph[currentPoint][i] > 0 &&
@@ -225,7 +236,7 @@ class ShowMapForAState extends State<ShowMapForA>
         newPoint.add(i);
       }
     }
-    if (_isOp) _changeParent(newPoint);
+    return newPoint;
   }
 
   void _changeParent(List<int> newPoint) {
@@ -284,6 +295,7 @@ class PainteA extends MapPainter {
   final List<int> _pathRoute;
   final String _state;
   final bool _isShowAxis;
+  final bool _isShowTree;
   final int _i;
   PainteA(
     _myMap,
@@ -294,6 +306,7 @@ class PainteA extends MapPainter {
     this._closePoints,
     this._pathRoute,
     this._isShowAxis,
+    this._isShowTree,
     this._state,
     this._i,
   ) : super(_myMap, _visualPoints);
@@ -314,7 +327,7 @@ class PainteA extends MapPainter {
         Colors.orange.shade900, _i + 1);
     super.drawRobot(canvas, size, myPaint, k);
     drawSet(canvas, size, myPaint, k);
-    drawTree(canvas, size, myPaint, k);
+    if (_isShowTree) drawTree(canvas, size, myPaint, k);
     super.drawState(canvas, size, myPaint, k, _state);
   }
 
