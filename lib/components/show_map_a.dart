@@ -27,10 +27,9 @@ class ShowMapForAState extends State<ShowMapForA>
   Map<int, int> _tree = Map<int, int>();
   Map<int, double> _pointToStartDis = Map<int, double>();
   Map<int, double> _openPointsValue = Map<int, double>();
-  bool _isOp = true;
+  bool _isOp = false;
   List<int> _pathRoute = [];
   List<int> _pathRouteOp = [];
-  bool _isShowOp = false;
   String _remindStr = '正在读取地图';
   bool _r = true;
   int _speed = 300;
@@ -69,8 +68,6 @@ class ShowMapForAState extends State<ShowMapForA>
                   this._tree,
                   this._closePoints,
                   this._pathRoute,
-                  this._pathRouteOp,
-                  this._isShowOp,
                   this._isShowAxis,
                   this._state,
                   this._i,
@@ -108,10 +105,7 @@ class ShowMapForAState extends State<ShowMapForA>
   }
 
   void toggleShowOp(bool isShow) {
-    _isShowOp = isShow;
-    (showPathDiatance.currentState as ShowPathDistanceState).update(
-      _calculatePathDistance().toStringAsFixed(2),
-    );
+    _isOp = isShow;
   }
 
   Future<bool> save(String path) async {
@@ -169,11 +163,10 @@ class ShowMapForAState extends State<ShowMapForA>
       _closePoints.add(currentPoint);
       _state = 'Update open set & Find next positon';
       await Future.delayed(Duration(milliseconds: _speed));
-      if (currentPoint == end) break;
+      if (_tree.containsKey(end)) break;
     }
     _state = 'Success !';
     _parsePathRoute();
-    _optimisingPath();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       _calculatePathDistance().toStringAsFixed(2),
     );
@@ -183,37 +176,10 @@ class ShowMapForAState extends State<ShowMapForA>
     }
   }
 
-  void _optimisingPath() {
-    List<int> tmpRoute = _pathRoute.reversed.toList();
-    int currentPoint = tmpRoute[0];
-    List<int> necessaryPath = [currentPoint];
-    int i = 0;
-    int tmpi = 0;
-    int tmpPoint = 0;
-    while (true) {
-      tmpi = 0;
-      tmpPoint = 0;
-      for (int j = i + 1; j < tmpRoute.length; j++)
-        if (_visualGraph[currentPoint][tmpRoute[j]] != -1) {
-          tmpPoint = tmpRoute[j];
-          tmpi = j;
-        }
-      i = tmpi;
-      currentPoint = tmpPoint;
-      necessaryPath.add(currentPoint);
-      if (necessaryPath[necessaryPath.length - 1] == _visualPoints.length - 1)
-        break;
-    }
-    _pathRouteOp = necessaryPath;
-  }
-
   double _calculatePathDistance() {
     double pathDistance = 0;
     List<int> tmp;
-    if (_isShowOp)
-      tmp = List.from(_pathRouteOp);
-    else
-      tmp = List.from(_pathRoute);
+    tmp = List.from(_pathRoute);
     for (int i = 0; i < tmp.length - 1; i++) {
       pathDistance += _visualGraph[tmp[i]][tmp[i + 1]];
     }
@@ -259,23 +225,37 @@ class ShowMapForAState extends State<ShowMapForA>
         newPoint.add(i);
       }
     }
-    _openPoints.forEach((e) => _changeParent(e));
+    if (_isOp) _changeParent(newPoint);
   }
 
-  void _changeParent(int opPoint) {
-    double distance = double.infinity;
-    for (int parent in _closePoints.union(_openPoints)) {
-      double tmp = _visualGraph[parent][opPoint];
-      if (tmp <= 0) continue;
-      if (tmp + _calculatePathDis(parent) < distance) {
-        distance = tmp + _calculatePathDis(parent);
-        _tree[opPoint] = parent;
+  void _changeParent(List<int> newPoint) {
+    List<int> oldParent =
+        List.generate(newPoint.length, (i) => _tree[newPoint[i]]);
+    while (true) {
+      for (int p in newPoint) {
+        double distance = double.infinity;
+        for (int parent in _closePoints.union(_openPoints)) {
+          double tmp = _visualGraph[parent][p];
+          if (tmp <= 0) continue;
+          double parentDis = newPoint.contains(parent)
+              ? _calculatePathDis(parent, true)
+              : _calculatePathDis(parent, false);
+          if (tmp + parentDis < distance) {
+            distance = tmp + parentDis;
+            _tree[p] = parent;
+          }
+        }
       }
+      List<int> newParent =
+          List.generate(newPoint.length, (i) => _tree[newPoint[i]]);
+      Set diff = newParent.toSet().difference(oldParent.toSet());
+      if (diff.length == 0) break;
+      oldParent = List.from(newParent);
     }
   }
 
-  double _calculatePathDis(int p) {
-    if (!_pointToStartDis.containsKey(p)) {
+  double _calculatePathDis(int p, bool isReCal) {
+    if (!_pointToStartDis.containsKey(p) || isReCal) {
       double dis = 0;
       List<int> path = [p];
       while (path[path.length - 1] != 0) {
@@ -285,14 +265,6 @@ class ShowMapForAState extends State<ShowMapForA>
       _pointToStartDis[p] = dis;
     }
     return _pointToStartDis[p];
-    //double dis = 0;
-    //List<int> path = [p];
-    //while (path[path.length - 1] != 0) {
-    //path.add(_tree[path[path.length - 1]]);
-    //dis = dis + _visualGraph[path[path.length - 1]][path[path.length - 2]];
-    //}
-    //_pointToStartDis[p] = dis;
-    //return _pointToStartDis[p];
   }
 
   void _parsePathRoute() {
@@ -311,8 +283,6 @@ class PainteA extends MapPainter {
   final Map<int, int> _tree;
   final List<int> _pathRoute;
   final String _state;
-  final List<int> _pathRouteOp;
-  final bool _isShowOp;
   final bool _isShowAxis;
   final int _i;
   PainteA(
@@ -323,8 +293,6 @@ class PainteA extends MapPainter {
     this._tree,
     this._closePoints,
     this._pathRoute,
-    this._pathRouteOp,
-    this._isShowOp,
     this._isShowAxis,
     this._state,
     this._i,
@@ -342,12 +310,8 @@ class PainteA extends MapPainter {
     Paint myPaint = Paint()..color = Colors.black;
     super.drawBarriers(canvas, size, myPaint, k);
     if (_isShowAxis) super.drawAxis(canvas, size, myPaint, k);
-    if (_isShowOp)
-      super.drawPathRoute(canvas, size, myPaint, k, _pathRouteOp, Colors.green,
-          Colors.green.shade900, _pathRouteOp.length);
-    else
-      super.drawPathRoute(canvas, size, myPaint, k, _pathRoute, Colors.orange,
-          Colors.orange.shade900, _i + 1);
+    super.drawPathRoute(canvas, size, myPaint, k, _pathRoute, Colors.orange,
+        Colors.orange.shade900, _i + 1);
     super.drawRobot(canvas, size, myPaint, k);
     drawSet(canvas, size, myPaint, k);
     drawTree(canvas, size, myPaint, k);
@@ -366,12 +330,9 @@ class PainteA extends MapPainter {
       canvas.drawCircle(
           offset, super.robotSize / (super.grid + 0.035) * k, myPaint);
       if (_openPointsValue.isNotEmpty) {
-        //double ma = _openPointsValue.;
-        //double mi = _openPointsValue.reduce(min);
-        double mi = 0;
-        double ma = 10;
+        double ma = _openPointsValue.values.reduce(max);
+        double mi = _openPointsValue.values.reduce(min);
         double fontSize = k * (7 - 3 * (_openPointsValue[p] - mi) / (ma - mi));
-        fontSize = 1;
         TextSpan span = TextSpan(
           text: _openPointsValue[p].toStringAsFixed(1),
           style: GoogleFonts.jua(
@@ -418,7 +379,7 @@ class PainteA extends MapPainter {
           _visualPoints[p][0].toDouble() * k +
               (size.height - k * (super.heigth / super.grid)) / 2);
       myPaint
-        ..strokeWidth = 2
+        ..strokeWidth = 1
         ..color = Colors.blue
         ..strokeCap = StrokeCap.round;
       canvas.drawLine(p1, p2, myPaint);

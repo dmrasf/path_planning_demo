@@ -73,7 +73,7 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                 ShowPathDistance(key: showPathDiatance),
                 Column(
                   children: [
-                    MySwitchButton(false, 'A*', '过滤', SwitchType.Op),
+                    MySwitchButton(false, 'A*', '优化', SwitchType.Op),
                     MySwitchButton(false, 'A*', '显示坐标', SwitchType.Axis),
                   ],
                 ),
