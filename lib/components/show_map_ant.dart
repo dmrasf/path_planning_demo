@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:path_planning/components/wait_show.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/my_painter.dart';
+import 'package:path_planning/components/line.dart';
 import 'package:path_planning/utils.dart';
 
 class ShowMapForAnt extends StatefulWidget {
@@ -44,6 +45,8 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   String _state = '';
   int _animationForShowAntsi = 0;
   bool _isShowAxis = false;
+  List<double> _iterationNumValue = [];
+  bool _isShowIter = false;
 
   @override
   void initState() {
@@ -51,7 +54,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       vsync: this,
       duration: Duration(minutes: 100),
     );
-    getMapAnimation();
+    _getMapAnimation();
     super.initState();
   }
 
@@ -64,29 +67,31 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   @override
   Widget build(BuildContext context) {
     return _isDone
-        ? AnimatedBuilder(
-            animation: _controller,
-            builder: (_, __) {
-              return CustomPaint(
-                painter: PainteAnt(
-                  _myMap,
-                  this._visualPoints,
-                  this._pathPhermonone,
-                  this._currentIter,
-                  this._i,
-                  this._pathRoute,
-                  this._pathRouteOp,
-                  this._isShowOp,
-                  this._antsPos,
-                  this._anti,
-                  this._isShowAnts,
-                  this._isShowAxis,
-                  this._state,
-                  this._animationForShowAntsi,
-                ),
-              );
-            },
-          )
+        ? (_isShowIter
+            ? LineChartSample1()
+            : AnimatedBuilder(
+                animation: _controller,
+                builder: (_, __) {
+                  return CustomPaint(
+                    painter: PainteAnt(
+                      _myMap,
+                      this._visualPoints,
+                      this._pathPhermonone,
+                      this._currentIter,
+                      this._i,
+                      this._pathRoute,
+                      this._pathRouteOp,
+                      this._isShowOp,
+                      this._antsPos,
+                      this._anti,
+                      this._isShowAnts,
+                      this._isShowAxis,
+                      this._state,
+                      this._animationForShowAntsi,
+                    ),
+                  );
+                },
+              ))
         : WaitShow(_remindStr, _r);
   }
 
@@ -94,7 +99,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _animationForShowAntsi = newValue;
   }
 
-  void getMapAnimation() async {
+  void _getMapAnimation() async {
     try {
       File f = File(widget.fileName);
       String mapStr = await f.readAsString();
@@ -115,12 +120,19 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   void toggleShowOp(bool isShow) {
     _isShowOp = isShow;
     (showPathDiatance.currentState as ShowPathDistanceState).update(
-      _calculatePathDistance().toStringAsFixed(2),
+      calculatePathDistance(_visualGraph, _isShowOp ? _pathRouteOp : _pathRoute)
+          .toStringAsFixed(2),
     );
   }
 
   void toggleShowAnts(bool isShow) {
     _isShowAnts = isShow;
+  }
+
+  void toggleShowIter(bool isShow) {
+    setState(() {
+      _isShowIter = isShow;
+    });
   }
 
   void toggleShowAxis(bool isShow) {
@@ -133,25 +145,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   Future<bool> save(String path) async {
     if (_pathRouteOp.isEmpty) return false;
-    double grid = _myMap['grid'].toDouble();
-    List<dynamic> start = _myMap['start'];
-    List<dynamic> end = _myMap['end'];
-    List<List<dynamic>> realPath = [start];
-    for (int i = 1; i < _pathRouteOp.length - 1; i++)
-      realPath.add([
-        (num.parse(
-          (_visualPoints[_pathRouteOp[i]][0] * grid).toStringAsFixed(2),
-        )),
-        (num.parse(
-          (_visualPoints[_pathRouteOp[i]][1] * grid).toStringAsFixed(2),
-        ))
-      ]);
-    realPath.add(end);
-    String pathStr = jsonEncode(realPath);
-    File f = File(path);
-    await f.create();
-    await f.writeAsString(pathStr);
-    return true;
+    return await saveRoute(path, _pathRouteOp, _myMap, _visualPoints);
   }
 
   Future<void> run(
@@ -171,13 +165,11 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _antPheromone = antPheromone;
     _initPathPhermononeValue = initAntPathPheromone;
     _iterationNum = iteration;
-    _currentIter = 0;
     _controller.reset();
     _controller.forward();
-    _pathPhermonone = [];
-    _antsPos = [];
-    _pathRoute = [];
-    _pathRouteOp = [];
+    _pathRoute.clear();
+    _pathRouteOp.clear();
+    _iterationNumValue.clear();
     _currentIter = 0;
     _i = 0;
     _state = 'Running . . .';
@@ -187,43 +179,38 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       _setAntsPosition();
       while (true) if (await _selectNextPosForAnts()) break;
       _updatePathPhermonone();
+      // 给折线图积累数据
+      _iterationNumValue.add(calculatePathDistance(
+        _visualGraph,
+        _parseFinalRoute(),
+      ));
       await Future.delayed(Duration(milliseconds: _speed));
     }
-    _parseFinalRoute();
+    _pathRoute = _parseFinalRoute();
     if (_pathRoute.isEmpty)
       _state = 'No path !';
     else
       _state = 'Success !';
     _optimisingPath();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
-      _calculatePathDistance().toStringAsFixed(2),
+      calculatePathDistance(_visualGraph, _isShowOp ? _pathRouteOp : _pathRoute)
+          .toStringAsFixed(2),
     );
+    // 路径生成动画
     for (int i = 0; i < _pathRoute.length; i++) {
       _i = i;
       await Future.delayed(Duration(milliseconds: 100));
     }
   }
 
-  double _calculatePathDistance() {
-    double pathDistance = 0;
-    List<int> tmp;
-    if (_isShowOp)
-      tmp = List.from(_pathRouteOp);
-    else
-      tmp = List.from(_pathRoute);
-    for (int i = 0; i < tmp.length - 1; i++) {
-      pathDistance += _visualGraph[tmp[i]][tmp[i + 1]];
-    }
-    return pathDistance;
-  }
-
-  void _parseFinalRoute() {
-    _pathRoute = [0];
+  /// 从信息素解析路径
+  List<int> _parseFinalRoute() {
+    List<int> pathRoute = [0];
     while (true) {
       List<double> sortPath = List.generate(
         _visualPoints.length,
         (index) => _calculateProbability(
-          _pathRoute[_pathRoute.length - 1],
+          pathRoute[pathRoute.length - 1],
           index,
         ),
       );
@@ -232,25 +219,28 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       bool isDone = false;
       for (double p in sortPath) {
         int i = tmp.indexWhere((e) => e == p);
-        if (!_pathRoute.contains(i)) {
-          _pathRoute.add(i);
+        if (!pathRoute.contains(i)) {
+          pathRoute.add(i);
           isDone = true;
           break;
         }
       }
       if (!isDone) {
-        _pathRoute = [];
+        pathRoute = [];
         break;
       }
-      if (_pathRoute[_pathRoute.length - 1] == _visualPoints.length - 1) break;
+      if (pathRoute[pathRoute.length - 1] == _visualPoints.length - 1) break;
     }
+    return pathRoute;
   }
 
+  /// 初始化信息素
   void _initPathPhermonone() {
+    _pathPhermonone.clear();
     for (int i = 0; i < _visualPoints.length; i++) {
       List<double> tmp = [];
       for (int j = 0; j < _visualPoints.length; j++) {
-        if (_visualGraph[i][j] == 0 || _visualGraph[i][j] == -1)
+        if (_visualGraph[i][j] <= 0)
           tmp.add(0.0);
         else
           tmp.add(_initPathPhermononeValue);
@@ -259,14 +249,12 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     }
   }
 
+  /// 设置蚂蚁初始位置
   void _setAntsPosition() {
-    _antsPos = [
-      [0]
-    ];
-    for (int i = 1; i < _antsNum; i++) {
-      _antsPos.add([0]);
-      //_antsPos.add([Random().nextInt(_visualPoints.length - 2)]);
-    }
+    _antsPos.clear();
+    _antsPos.add([0]);
+    for (int i = 1; i < _antsNum; i++) _antsPos.add([0]);
+    //_antsPos.add([Random().nextInt(_visualPoints.length - 2)]);
   }
 
   double _calculateProbability(int p1, int p2) {
@@ -275,6 +263,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     return pow(_pathPhermonone[p1][p2], _a) * pow(pathDistance, _b);
   }
 
+  /// 每只蚂蚁移动到终点或者绝路
   Future<bool> _selectNextPosForAnts() async {
     bool isAllArrived = true;
     _animationForShowAntsi = 0;
@@ -312,11 +301,13 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       }
       if (antPath.length > _anti) _anti = antPath.length;
     }
+    // 显示蚂蚁
     while (_animationForShowAntsi < 20 && _isShowAnts)
       await Future.delayed(Duration(milliseconds: 0));
     return isAllArrived;
   }
 
+  /// 更新信息素
   void _updatePathPhermonone() {
     for (int i = 0; i < _visualPoints.length; i++)
       for (int j = 0; j < _visualPoints.length; j++)
@@ -336,6 +327,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     }
   }
 
+  /// 过滤掉多余的点
   void _optimisingPath() {
     if (_pathRoute.isEmpty) return;
     int currentPoint = _pathRoute[0];
@@ -401,7 +393,6 @@ class PainteAnt extends MapPainter {
         : size.height / gridHeigth;
 
     Paint myPaint = Paint()..color = Colors.black;
-    //super.drawName(canvas, size, myPaint, k);
     super.drawBarriers(canvas, size, myPaint, k);
     if (_isShowAxis) drawAxis(canvas, size, myPaint, k);
     drawPhermone(canvas, size, myPaint, k);

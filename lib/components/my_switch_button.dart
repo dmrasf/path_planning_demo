@@ -4,6 +4,8 @@ import 'package:path_planning/components/show_map_ant.dart';
 import 'package:path_planning/components/show_map_a.dart';
 import 'package:path_planning/components/show_map_rrt.dart';
 
+enum SwitchType { Op, Axis, Ants, Tree, Iter }
+
 class MySwitchButton extends StatefulWidget {
   final String _algorithmName;
   final bool _value;
@@ -67,6 +69,11 @@ class _MySwitchButtonState extends State<MySwitchButton> {
                 if (widget._algorithmName == 'A*')
                   (showMapKeyForA.currentState as ShowMapForAState)
                       .toggleShowTree(newValue);
+                break;
+              case SwitchType.Iter:
+                if (widget._algorithmName == 'Ant Colony')
+                  (showMapKeyForAnt.currentState as ShowMapForAntState)
+                      .toggleShowIter(newValue);
                 break;
               default:
                 break;

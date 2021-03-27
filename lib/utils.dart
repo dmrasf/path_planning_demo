@@ -1,14 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
 import 'dart:math' show Random;
 
 final GlobalKey showMapKeyForA = GlobalKey();
 final GlobalKey showMapKeyForAnt = GlobalKey();
 final GlobalKey showMapKeyForRRT = GlobalKey();
 final GlobalKey showPathDiatance = GlobalKey();
-
-enum SwitchType { Op, Axis, Ants, Tree }
 
 Future<String> pickFile(String extension) async {
   bool _noExtension = false;
@@ -136,4 +135,42 @@ void slideChangePage(BuildContext context, Widget widget) {
       ),
     ),
   );
+}
+
+Future<bool> saveRoute(
+  String path,
+  List<int> pathRoute,
+  Map<String, dynamic> myMap,
+  List<dynamic> visualPoints,
+) async {
+  double grid = myMap['grid'].toDouble();
+  List<dynamic> start = myMap['start'];
+  List<dynamic> end = myMap['end'];
+  List<List<dynamic>> realPath = [start];
+  for (int i = 1; i < pathRoute.length - 1; i++)
+    realPath.add([
+      (num.parse(
+        (visualPoints[pathRoute[i]][0] * grid).toStringAsFixed(2),
+      )),
+      (num.parse(
+        (visualPoints[pathRoute[i]][1] * grid).toStringAsFixed(2),
+      ))
+    ]);
+  realPath.add(end);
+  String pathStr = jsonEncode(realPath);
+  File f = File(path);
+  await f.create();
+  await f.writeAsString(pathStr);
+  return true;
+}
+
+double calculatePathDistance(
+  List<dynamic> visualGraph,
+  List<int> pathRoute,
+) {
+  double pathDistance = 0;
+  for (int i = 0; i < pathRoute.length - 1; i++) {
+    pathDistance += visualGraph[pathRoute[i]][pathRoute[i + 1]];
+  }
+  return pathDistance;
 }

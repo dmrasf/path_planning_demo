@@ -161,8 +161,8 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     _controller.reset();
     _controller.forward();
     _radius = radius;
-    _pathRoute = [];
-    _pathRouteOp = [];
+    _pathRoute.clear();
+    _pathRouteOp.clear();
     _tree.clear();
     _closePoints = Set.from([0]);
     _openPoints.clear();

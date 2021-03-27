@@ -133,6 +133,8 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                     MySwitchButton(
                         false, 'Ant Colony', '显示蚂蚁', SwitchType.Ants),
                     MySwitchButton(
+                        false, 'Ant Colony', '显示折线', SwitchType.Iter),
+                    MySwitchButton(
                         false, 'Ant Colony', '显示坐标', SwitchType.Axis),
                   ],
                 ),

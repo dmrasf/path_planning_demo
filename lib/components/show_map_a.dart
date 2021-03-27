@@ -29,7 +29,6 @@ class ShowMapForAState extends State<ShowMapForA>
   Map<int, double> _openPointsValue = Map<int, double>();
   bool _isOp = false;
   List<int> _pathRoute = [];
-  List<int> _pathRouteOp = [];
   String _remindStr = '正在读取地图';
   bool _r = true;
   int _speed = 300;
@@ -44,7 +43,7 @@ class ShowMapForAState extends State<ShowMapForA>
       vsync: this,
       duration: Duration(minutes: 100),
     );
-    getMapAnimation();
+    _getMapAnimation();
     super.initState();
   }
 
@@ -80,7 +79,8 @@ class ShowMapForAState extends State<ShowMapForA>
         : WaitShow(_remindStr, _r);
   }
 
-  Future<void> getMapAnimation() async {
+  /// 从地图文件解析可视点 保存到本地变量
+  Future<void> _getMapAnimation() async {
     try {
       File f = File(widget.fileName);
       String mapStr = await f.readAsString();
@@ -98,43 +98,30 @@ class ShowMapForAState extends State<ShowMapForA>
     setState(() {});
   }
 
+  /// 改变动画速度
   void changeSpeed(int newSpeed) {
     _speed = newSpeed;
   }
 
+  /// 是否显示坐标轴
   void toggleShowAxis(bool isShow) {
     _isShowAxis = isShow;
   }
 
+  /// 是否显示构造的树
   void toggleShowTree(bool isShow) {
     _isShowTree = isShow;
   }
 
+  /// 是否优化
   void toggleShowOp(bool isShow) {
     _isOp = isShow;
   }
 
+  /// 保存计算出的点
   Future<bool> save(String path) async {
-    if (_pathRouteOp.isEmpty) return false;
-    double grid = _myMap['grid'].toDouble();
-    List<dynamic> start = _myMap['start'];
-    List<dynamic> end = _myMap['end'];
-    List<List<dynamic>> realPath = [start];
-    for (int i = 1; i < _pathRouteOp.length - 1; i++)
-      realPath.add([
-        (num.parse(
-          (_visualPoints[_pathRouteOp[i]][0] * grid).toStringAsFixed(2),
-        )),
-        (num.parse(
-          (_visualPoints[_pathRouteOp[i]][1] * grid).toStringAsFixed(2),
-        ))
-      ]);
-    realPath.add(end);
-    String pathStr = jsonEncode(realPath);
-    File f = File(path);
-    await f.create();
-    await f.writeAsString(pathStr);
-    return true;
+    if (_pathRoute.isEmpty) return false;
+    return await saveRoute(path, _pathRoute, _myMap, _visualPoints);
   }
 
   void run(double hWeight, double gWeight) async {
@@ -150,7 +137,6 @@ class ShowMapForAState extends State<ShowMapForA>
     _openPointsValue.clear();
     _tree.clear();
     _pathRoute.clear();
-    _pathRouteOp.clear();
     _i = 0;
     int start = 0;
     int end = _visualPoints.length - 1;
@@ -170,6 +156,7 @@ class ShowMapForAState extends State<ShowMapForA>
       _closePoints.add(currentPoint);
       _state = 'Update open set & Find next positon';
       await Future.delayed(Duration(milliseconds: _speed));
+      // 两种判断结束的标志
       if (_isOp) {
         if (_tree.containsKey(end)) break;
       } else {
@@ -179,7 +166,7 @@ class ShowMapForAState extends State<ShowMapForA>
     _state = 'Success !';
     _parsePathRoute();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
-      _calculatePathDistance().toStringAsFixed(2),
+      calculatePathDistance(_visualGraph, _pathRoute).toStringAsFixed(2),
     );
     for (int i = 0; i < _pathRoute.length; i++) {
       _i = i;
@@ -187,16 +174,7 @@ class ShowMapForAState extends State<ShowMapForA>
     }
   }
 
-  double _calculatePathDistance() {
-    double pathDistance = 0;
-    List<int> tmp;
-    tmp = List.from(_pathRoute);
-    for (int i = 0; i < tmp.length - 1; i++) {
-      pathDistance += _visualGraph[tmp[i]][tmp[i + 1]];
-    }
-    return pathDistance;
-  }
-
+  /// 从所有可选点中，通过启发函数，得出最优点
   int _findNextPoint(
     int currentPoint,
     double hWeight,
@@ -214,8 +192,7 @@ class ShowMapForAState extends State<ShowMapForA>
         0.5,
       );
       double g = _visualGraph[currentPoint][p];
-      double f =
-          h * (hWeight == 0 ? 1 : hWeight) + g * (gWeight == 0 ? 1 : gWeight);
+      double f = h * hWeight + g * gWeight;
       _openPointsValue[p] = f;
       if (f < minDistance) {
         minDistance = f;
@@ -225,6 +202,7 @@ class ShowMapForAState extends State<ShowMapForA>
     return bestPoint;
   }
 
+  /// 更新可以访问的点，并返回新加入的点
   List<int> _updateOpenPoints(int currentPoint) {
     List<int> newPoint = [];
     for (int i = 0; i < _visualPoints.length; i++) {
@@ -239,6 +217,7 @@ class ShowMapForAState extends State<ShowMapForA>
     return newPoint;
   }
 
+  /// 优化函数，修改新加入点的父结点
   void _changeParent(List<int> newPoint) {
     List<int> oldParent =
         List.generate(newPoint.length, (i) => _tree[newPoint[i]]);
@@ -278,6 +257,7 @@ class ShowMapForAState extends State<ShowMapForA>
     return _pointToStartDis[p];
   }
 
+  /// 从树中解析路径
   void _parsePathRoute() {
     _pathRoute = [_visualPoints.length - 1];
     _pathRoute = [_visualPoints.length - 1];
