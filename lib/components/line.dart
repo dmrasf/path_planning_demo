@@ -17,16 +17,16 @@ class _LinePathForAntState extends State<LinePathForAnt> {
       child: AspectRatio(
         aspectRatio: 3 / 2,
         child: Container(
-          color: Colors.grey.withOpacity(0.3),
+          color: Colors.grey.withOpacity(0.1),
           padding: EdgeInsets.only(top: 20, bottom: 5, right: 10, left: 5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               const Text(
-                '路径值',
+                '路径长度随迭代次数变化图',
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: 16,
+                  fontSize: 20,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -87,9 +87,9 @@ class _LinePathForAntState extends State<LinePathForAnt> {
         ),
       ),
       minX: 0,
-      maxX: (widget._pathDistance.length - 1).toDouble(),
+      maxX: (widget._pathDistance.length - 1).toDouble() + 2,
       minY: 0,
-      maxY: widget._pathDistance.reduce(max).toDouble() + 20,
+      maxY: widget._pathDistance.reduce(max).toDouble() + 10,
       lineBarsData: linesBarData(),
     );
   }
@@ -100,7 +100,12 @@ class _LinePathForAntState extends State<LinePathForAnt> {
         widget._pathDistance.length,
         (i) => FlSpot(
           i.toDouble(),
-          double.parse(widget._pathDistance[i].toStringAsFixed(2)),
+          double.parse((widget._pathDistance[i] == 0
+                  ? (widget._pathDistance.reduce(min) +
+                          widget._pathDistance.reduce(max)) /
+                      2
+                  : widget._pathDistance[i])
+              .toStringAsFixed(2)),
         ),
       ),
       isCurved: false,
@@ -108,7 +113,7 @@ class _LinePathForAntState extends State<LinePathForAnt> {
       barWidth: 1,
       isStrokeCapRound: true,
       dotData: FlDotData(show: false),
-      belowBarData: BarAreaData(show: true),
+      belowBarData: BarAreaData(show: false),
     );
     return [lineChartBarData];
   }

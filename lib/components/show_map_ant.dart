@@ -148,13 +148,27 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     return await saveRoute(path, _pathRouteOp, _myMap, _visualPoints);
   }
 
+  double _initPathPher() {
+    int eage = 0;
+    double sum = 0;
+    for (int i = 0; i < _visualPoints.length - 1; i++) {
+      for (int j = i; j < _visualPoints.length; j++) {
+        if (_visualGraph[i][j] > 0) {
+          eage++;
+          sum += _visualGraph[i][j];
+        }
+      }
+    }
+    sum /= eage;
+    return sum;
+  }
+
   Future<void> run(
     int antsNum,
     double a,
     double b,
     double p,
     double antPheromone,
-    double initAntPathPheromone,
     int iteration,
   ) async {
     if (!_isDone) return;
@@ -163,7 +177,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _b = b;
     _p = p;
     _antPheromone = antPheromone;
-    _initPathPhermononeValue = initAntPathPheromone;
+    _initPathPhermononeValue = _initPathPher();
     _iterationNum = iteration;
     _controller.reset();
     _controller.forward();
@@ -197,38 +211,35 @@ class ShowMapForAntState extends State<ShowMapForAnt>
           .toStringAsFixed(2),
     );
     // 路径生成动画
-    for (int i = 0; i < _pathRoute.length; i++) {
-      _i = i;
-      await Future.delayed(Duration(milliseconds: 100));
-    }
+    _i = _pathRoute.length - 1;
+    //for (int i = 0; i < _pathRoute.length; i++) {
+    //_i = i;
+    //await Future.delayed(Duration(milliseconds: 100));
+    //}
   }
 
   /// 从信息素解析路径
   List<int> _parseFinalRoute() {
     List<int> pathRoute = [0];
     while (true) {
-      List<double> sortPath = List.generate(
-        _visualPoints.length,
-        (index) => _calculateProbability(
-          pathRoute[pathRoute.length - 1],
-          index,
-        ),
-      );
-      List<double> tmp = List.from(sortPath);
-      sortPath.sort((l, r) => r.compareTo(l));
-      bool isDone = false;
-      for (double p in sortPath) {
-        int i = tmp.indexWhere((e) => e == p);
-        if (!pathRoute.contains(i)) {
-          pathRoute.add(i);
-          isDone = true;
-          break;
+      Map<int, double> path = {};
+      for (int i = 0; i < _visualPoints.length; i++)
+        if (_pathPhermonone[pathRoute[pathRoute.length - 1]][i] > 0)
+          path[i] = _pathPhermonone[pathRoute[pathRoute.length - 1]][i];
+      for (int p in pathRoute) path.remove(p);
+      double pher = -1;
+      int nextP = -1;
+      path.forEach((key, value) {
+        if (value > pher) {
+          nextP = key;
+          pher = value;
         }
-      }
-      if (!isDone) {
+      });
+      if (nextP == -1) {
         pathRoute = [];
         break;
       }
+      pathRoute.add(nextP);
       if (pathRoute[pathRoute.length - 1] == _visualPoints.length - 1) break;
     }
     return pathRoute;
@@ -252,15 +263,14 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   /// 设置蚂蚁初始位置
   void _setAntsPosition() {
     _antsPos.clear();
-    _antsPos.add([0]);
-    for (int i = 1; i < _antsNum; i++) _antsPos.add([0]);
+    for (int i = 0; i < _antsNum; i++) _antsPos.add([0]);
     //_antsPos.add([Random().nextInt(_visualPoints.length - 2)]);
   }
 
   double _calculateProbability(int p1, int p2) {
-    if (_visualGraph[p1][p2] == 0 || _visualGraph[p1][p2] == -1) return 0;
+    if (_visualGraph[p1][p2] <= 0) return 0;
     double pathDistance = _visualGraph[p1][p2];
-    return pow(_pathPhermonone[p1][p2], _a) * pow(pathDistance, _b);
+    return pow(_pathPhermonone[p1][p2], _a) * pow(1 / pathDistance, _b);
   }
 
   /// 每只蚂蚁移动到终点或者绝路
@@ -274,28 +284,29 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       if (antPath[antPath.length - 1] == -2 ||
           antPath[antPath.length - 1] == -1) continue;
       isAllArrived = false;
-      List<int> pointToSelected = List.generate(
-        _visualPoints.length,
-        (index) => index,
-      );
+      List<int> pointToSelected = List.generate(_visualPoints.length, (i) => i);
       pointToSelected.remove(0);
       for (int pos in antPath) pointToSelected.remove(pos);
-      List<double> probabilities =
-          pointToSelected.map((i) => i.toDouble()).toList();
-      for (int i = 0; i < probabilities.length; i++)
-        probabilities[i] = _calculateProbability(
+      List<double> probabilities = [];
+      List<int> points = [];
+      for (int i = 0; i < pointToSelected.length; i++) {
+        double tmp = _calculateProbability(
           antPath[antPath.length - 1],
           pointToSelected[i],
         );
+        if (tmp == 0) continue;
+        probabilities.add(tmp);
+        points.add(pointToSelected[i]);
+      }
       double sum = 0;
-      probabilities.forEach((element) => sum += element);
+      probabilities.forEach((e) => sum += e);
       if (sum == 0) {
         antPath.add(-1);
         break;
       }
       for (int i = 0; i < probabilities.length; i++) probabilities[i] /= sum;
       try {
-        antPath.add(randomChoice(pointToSelected, probabilities));
+        antPath.add(randomChoice(points, probabilities));
       } catch (e) {
         antPath.add(-1);
       }
@@ -309,21 +320,29 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   /// 更新信息素
   void _updatePathPhermonone() {
-    for (int i = 0; i < _visualPoints.length; i++)
-      for (int j = 0; j < _visualPoints.length; j++)
-        _pathPhermonone[i][j] *= (1 - _p);
+    for (int i = 0; i < _visualPoints.length - 1; i++)
+      for (int j = i; j < _visualPoints.length; j++)
+        if (_pathPhermonone[i][j] > 0.15) {
+          _pathPhermonone[i][j] *= (1 - _p);
+          _pathPhermonone[j][i] = _pathPhermonone[i][j];
+        }
+    double distance = double.infinity;
+    List<int> best = [];
     for (List<int> antPath in _antsPos) {
       if (antPath[antPath.length - 1] != -1) {
-        double path = 0;
-        for (int i = 0; i < antPath.length - 2; i++)
-          path += _visualGraph[antPath[i]][antPath[i + 1]];
-        double deltaP = _antPheromone / path;
-        for (int i = 0; i < antPath.length - 2; i++) {
-          _pathPhermonone[antPath[i]][antPath[i + 1]] += deltaP;
-          _pathPhermonone[antPath[i + 1]][antPath[i]] =
-              _pathPhermonone[antPath[i]][antPath[i + 1]];
+        double tmp = calculatePathDistance(
+            _visualGraph, antPath.sublist(0, antPath.length - 1));
+        if (tmp < distance) {
+          distance = tmp;
+          best = antPath;
         }
       }
+    }
+    double deltaP = _antPheromone / distance;
+    for (int i = 0; i < best.length - 2; i++) {
+      _pathPhermonone[best[i]][best[i + 1]] += deltaP;
+      _pathPhermonone[best[i + 1]][best[i]] =
+          _pathPhermonone[best[i]][best[i + 1]];
     }
   }
 

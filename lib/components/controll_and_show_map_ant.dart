@@ -38,8 +38,8 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
   void initState() {
     _controllerAntsNum.text = "100";
     _controllerA.text = "1";
-    _controllerB.text = "0.1";
-    _controllerP.text = "0.8";
+    _controllerB.text = "3";
+    _controllerP.text = "0.5";
     _controllerAntPheromone.text = "50";
     _controllerInitPathPheromone.text = "1";
     _controllerIteration.text = "200";
@@ -110,13 +110,6 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                         r'^\d+[\.\d]?\d*$',
                       ),
                       MyTextField(
-                        _controllerInitPathPheromone,
-                        _focusNodeInitPathPheromone,
-                        '路径初始信息素',
-                        'double',
-                        r'^\d+[\.\d]?\d*$',
-                      ),
-                      MyTextField(
                         _controllerIteration,
                         _focusNodeIteration,
                         '迭代次数',
@@ -183,11 +176,6 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                           _controllerAntPheromone.text.isEmpty
                               ? '50'
                               : _controllerAntPheromone.text,
-                        ),
-                        double.parse(
-                          _controllerInitPathPheromone.text.isEmpty
-                              ? '1.0'
-                              : _controllerInitPathPheromone.text,
                         ),
                         int.parse(
                           _controllerIteration.text.isEmpty
