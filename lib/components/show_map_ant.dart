@@ -68,7 +68,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   Widget build(BuildContext context) {
     return _isDone
         ? (_isShowIter
-            ? LineChartSample1()
+            ? LinePathForAnt(_iterationNumValue)
             : AnimatedBuilder(
                 animation: _controller,
                 builder: (_, __) {
