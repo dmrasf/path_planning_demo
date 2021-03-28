@@ -303,7 +303,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       probabilities.forEach((e) => sum += e);
       if (sum == 0) {
         antPath.add(-1);
-        break;
+        continue;
       }
       for (int i = 0; i < probabilities.length; i++) probabilities[i] /= sum;
       try {
