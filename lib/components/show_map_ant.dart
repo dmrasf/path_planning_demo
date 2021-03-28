@@ -46,6 +46,8 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   bool _isShowAxis = false;
   List<double> _iterationNumValue = [];
   bool _isShowIter = false;
+  List<int> _preBest = [];
+  double _preBestDistance = double.infinity;
 
   @override
   void initState() {
@@ -181,6 +183,8 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _controller.forward();
     _pathRoute.clear();
     _pathRouteOp.clear();
+    _preBest.clear();
+    _preBestDistance = double.infinity;
     _iterationNumValue.clear();
     _currentIter = 0;
     _i = 0;
@@ -317,11 +321,11 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   /// 更新信息素
   void _updatePathPhermonone() {
     for (int i = 0; i < _visualPoints.length - 1; i++)
-      for (int j = i; j < _visualPoints.length; j++)
-        if (_pathPhermonone[i][j] > 0.15) {
-          _pathPhermonone[i][j] *= (1 - _p);
-          _pathPhermonone[j][i] = _pathPhermonone[i][j];
-        }
+      for (int j = i; j < _visualPoints.length; j++) {
+        if (_visualGraph[i][j] <= 0) continue;
+        if (_pathPhermonone[i][j] > 0.15) _pathPhermonone[i][j] *= (1 - _p);
+        _pathPhermonone[j][i] = _pathPhermonone[i][j];
+      }
     double distance = double.infinity;
     List<int> best = [];
     for (List<int> antPath in _antsPos) {
@@ -333,6 +337,14 @@ class ShowMapForAntState extends State<ShowMapForAnt>
           best = antPath;
         }
       }
+    }
+    if (best.isEmpty) return;
+    if (_preBest.isEmpty || distance <= _preBestDistance) {
+      _preBest = best;
+      _preBestDistance = distance;
+    } else {
+      distance = _preBestDistance;
+      best = _preBest;
     }
     double deltaP = _antPheromone / distance;
     for (int i = 0; i < best.length - 2; i++) {
