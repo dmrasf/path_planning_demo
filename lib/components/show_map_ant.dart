@@ -40,7 +40,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   bool _isShowOp = false;
   int _currentIter = 0;
   int _i = 0;
-  int _anti = 1;
   bool _isShowAnts = false;
   String _state = '';
   int _animationForShowAntsi = 0;
@@ -83,7 +82,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
                       this._pathRouteOp,
                       this._isShowOp,
                       this._antsPos,
-                      this._anti,
                       this._isShowAnts,
                       this._isShowAxis,
                       this._state,
@@ -212,10 +210,10 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     );
     // 路径生成动画
     _i = _pathRoute.length - 1;
-    //for (int i = 0; i < _pathRoute.length; i++) {
-    //_i = i;
-    //await Future.delayed(Duration(milliseconds: 100));
-    //}
+    for (int i = 0; i < _pathRoute.length; i++) {
+      _i = i;
+      await Future.delayed(Duration(milliseconds: 50));
+    }
   }
 
   /// 从信息素解析路径
@@ -277,7 +275,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   Future<bool> _selectNextPosForAnts() async {
     bool isAllArrived = true;
     _animationForShowAntsi = 0;
-    _anti = 1;
     for (List<int> antPath in _antsPos) {
       if (antPath[antPath.length - 1] == _visualPoints.length - 1)
         antPath.add(-2);
@@ -310,7 +307,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       } catch (e) {
         antPath.add(-1);
       }
-      if (antPath.length > _anti) _anti = antPath.length;
     }
     // 显示蚂蚁
     while (_animationForShowAntsi < 20 && _isShowAnts)
@@ -381,7 +377,6 @@ class PainteAnt extends MapPainter {
   final List<int> _pathRouteOp;
   final bool _isShowOp;
   final List<List<int>> _antsPos;
-  final int _anti;
   final bool _isShowAnts;
   final bool _isShowAxis;
   final String _state;
@@ -396,7 +391,6 @@ class PainteAnt extends MapPainter {
     this._pathRouteOp,
     this._isShowOp,
     this._antsPos,
-    this._anti,
     this._isShowAnts,
     this._isShowAxis,
     this._state,
@@ -428,29 +422,27 @@ class PainteAnt extends MapPainter {
   }
 
   void drawAnts(Canvas canvas, Size size, Paint myPaint, double k) {
-    if (_anti < 2) {
-      (showMapKeyForAnt.currentState as ShowMapForAntState)
-          .changeAnimationi(20);
-      return;
-    }
     myPaint..color = Colors.black;
     final TextPainter tp = TextPainter(
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     );
+    Map<Offset, int> antPosNum = {};
     _antsPos.asMap().forEach((i, antPath) {
+      bool isAlive = false;
       Offset p;
-      if (antPath[antPath.length - 1] == -1) {
+      if (antPath[antPath.length - 1] == -1 ||
+          antPath[antPath.length - 1] == -2) {
         p = Offset(
             _visualPoints[antPath[antPath.length - 2]][1].toDouble() * k +
                 (size.width - k * (super.width / super.grid)) / 2,
             _visualPoints[antPath[antPath.length - 2]][0].toDouble() * k +
                 (size.height - k * (super.heigth / super.grid)) / 2);
-      } else if (antPath[antPath.length - 1] == -2) {
+      } else if (antPath.length == 1) {
         p = Offset(
-            _visualPoints[antPath[antPath.length - 2]][1].toDouble() * k +
+            _visualPoints[antPath[antPath.length - 1]][1].toDouble() * k +
                 (size.width - k * (super.width / super.grid)) / 2,
-            _visualPoints[antPath[antPath.length - 2]][0].toDouble() * k +
+            _visualPoints[antPath[antPath.length - 1]][0].toDouble() * k +
                 (size.height - k * (super.heigth / super.grid)) / 2);
       } else {
         Offset p1 = Offset(
@@ -464,20 +456,26 @@ class PainteAnt extends MapPainter {
             _visualPoints[antPath[antPath.length - 1]][0].toDouble() * k +
                 (size.height - k * (super.heigth / super.grid)) / 2);
         p = p1 + (p2 - p1) * _animationForShowAntsi.toDouble() / 20;
+        isAlive = true;
       }
-      canvas.drawCircle(
-        p +
-            Offset(Random().nextDouble() - 0.5, Random().nextDouble() - 0.5) *
-                5,
-        k * 2,
-        myPaint,
-      );
+      if (antPosNum.containsKey(p))
+        antPosNum[p] += 1;
+      else
+        antPosNum[p] = 0;
+      Offset life = !isAlive
+          ? Offset.zero
+          : Offset(Random().nextDouble() - 0.5, Random().nextDouble() - 0.5) *
+              5;
+      canvas.drawCircle(p + life, k * 2, myPaint);
+    });
+    antPosNum.forEach((p, i) {
       TextSpan span = TextSpan(
         text: (i + 1).toString(),
         style: GoogleFonts.jua(
           textStyle: TextStyle(
-            color: Colors.pink.shade900,
+            color: Colors.pink.shade300,
             fontSize: k * 6,
+            fontWeight: FontWeight.bold,
           ),
         ),
       );
