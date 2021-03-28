@@ -174,7 +174,6 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     int i = 0;
     for (; i < _iterationNum; i++) {
       int xRand = _getRandomPoint();
-      print('xRand = $xRand');
       if (xRand == -1) break;
       int xNear = _findNearPoint(xRand);
       if (xNear == -1) continue;

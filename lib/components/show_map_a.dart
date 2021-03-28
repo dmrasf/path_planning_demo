@@ -306,12 +306,24 @@ class PainteA extends MapPainter {
     super.drawPathRoute(canvas, size, myPaint, k, _pathRoute, Colors.orange,
         Colors.orange.shade900, _i + 1);
     super.drawRobot(canvas, size, myPaint, k);
-    drawSet(canvas, size, myPaint, k);
     if (_isShowTree) drawTree(canvas, size, myPaint, k);
+    drawSet(canvas, size, myPaint, k);
     super.drawState(canvas, size, myPaint, k, _state);
   }
 
   void drawSet(Canvas canvas, Size size, Paint myPaint, double k) {
+    for (int p in _closePoints) {
+      myPaint..color = Colors.blue;
+      canvas.drawCircle(
+        Offset(
+            _visualPoints[p][1].toDouble() * k +
+                (size.width - k * (super.width / super.grid)) / 2,
+            _visualPoints[p][0].toDouble() * k +
+                (size.height - k * (super.heigth / super.grid)) / 2),
+        super.robotSize / (super.grid + 0.035) * k,
+        myPaint,
+      );
+    }
     for (int p in _openPoints) {
       myPaint..color = Colors.yellow;
       Offset offset = Offset(
@@ -345,18 +357,6 @@ class PainteA extends MapPainter {
         tp.paint(canvas, offset + Offset(-fontSize * 0.7, -fontSize * 0.6));
       }
     }
-    for (int p in _closePoints) {
-      myPaint..color = Colors.blue;
-      canvas.drawCircle(
-        Offset(
-            _visualPoints[p][1].toDouble() * k +
-                (size.width - k * (super.width / super.grid)) / 2,
-            _visualPoints[p][0].toDouble() * k +
-                (size.height - k * (super.heigth / super.grid)) / 2),
-        super.robotSize / (super.grid + 0.035) * k,
-        myPaint,
-      );
-    }
   }
 
   void drawTree(Canvas canvas, Size size, Paint myPaint, double k) {
@@ -372,8 +372,8 @@ class PainteA extends MapPainter {
           _visualPoints[p][0].toDouble() * k +
               (size.height - k * (super.heigth / super.grid)) / 2);
       myPaint
-        ..strokeWidth = 1
-        ..color = Colors.blue
+        ..strokeWidth = k * 0.5
+        ..color = Colors.green.shade600
         ..strokeCap = StrokeCap.round;
       canvas.drawLine(p1, p2, myPaint);
     });
