@@ -13,35 +13,48 @@ class LinePathForAnt extends StatefulWidget {
 class _LinePathForAntState extends State<LinePathForAnt> {
   @override
   Widget build(BuildContext context) {
-    return Align(
-      child: AspectRatio(
-        aspectRatio: 3 / 2,
-        child: Container(
-          color: Colors.grey.withOpacity(0.1),
-          padding: EdgeInsets.only(top: 20, bottom: 5, right: 10, left: 5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const Text(
-                '路径长度随迭代次数变化图',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: LineChart(
-                  lineData(),
-                  swapAnimationDuration: const Duration(milliseconds: 100),
+    return widget._pathDistance.isEmpty
+        ? Center(
+            child: Text(
+              'No data',
+              style: GoogleFonts.jua(
+                textStyle: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          )
+        : Align(
+            child: AspectRatio(
+              aspectRatio: 3 / 2,
+              child: Container(
+                padding:
+                    EdgeInsets.only(top: 20, bottom: 5, right: 10, left: 5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    const Text(
+                      '路径长度随迭代次数变化图',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: LineChart(
+                        lineData(),
+                        swapAnimationDuration:
+                            const Duration(milliseconds: 100),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
   }
 
   TextStyle _barStyle() {
