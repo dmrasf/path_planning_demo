@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_planning/components/algorithm_card.dart';
+import 'package:path_planning/model.dart';
+import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).backgroundColor,
       height: double.infinity,
       width: double.infinity,
       alignment: Alignment.center,
@@ -27,6 +29,9 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
+              Spacer(),
+              ChangeThemeButton(),
+              SizedBox(width: 15),
               Tooltip(
                 message: '退出',
                 child: TextButton(
@@ -75,6 +80,31 @@ class HomePage extends StatelessWidget {
           ),
           Spacer(),
         ],
+      ),
+    );
+  }
+}
+
+class ChangeThemeButton extends StatefulWidget {
+  @override
+  _ChangeThemeButtonState createState() => _ChangeThemeButtonState();
+}
+
+class _ChangeThemeButtonState extends State<ChangeThemeButton> {
+  bool _isLight = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<MyThemeModel>(context);
+    return TextButton(
+      onPressed: () => setState(() {
+        _isLight = !_isLight;
+        provider.changeTheme(_isLight);
+      }),
+      child: Icon(_isLight ? Icons.nightlight_round : Icons.brightness_high),
+      style: ButtonStyle(
+        foregroundColor: MaterialStateProperty.all(Colors.black),
+        minimumSize: MaterialStateProperty.all(Size.zero),
       ),
     );
   }
