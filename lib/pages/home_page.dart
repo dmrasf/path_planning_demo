@@ -11,7 +11,7 @@ class HomePage extends StatelessWidget {
       height: double.infinity,
       width: double.infinity,
       alignment: Alignment.center,
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.only(top: 20, left: 15, right: 15),
       child: Column(
         children: [
           Row(
@@ -56,9 +56,10 @@ class HomePage extends StatelessWidget {
           Spacer(),
           Container(
             height: MediaQuery.of(context).size.height * 0.37,
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            color: Colors.transparent,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(vertical: 20),
               physics: BouncingScrollPhysics(),
               shrinkWrap: true,
               children: <Widget>[
