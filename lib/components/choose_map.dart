@@ -78,14 +78,13 @@ class _MapItemState extends State<MapItem> {
               size: MediaQuery.of(context).size,
             ),
             Positioned(
-              top: 60,
               child: Text(
                 mapName,
-                style: GoogleFonts.jua(
+                style: GoogleFonts.maShanZheng(
                   textStyle: TextStyle(
-                    fontSize: 50,
+                    fontSize: MediaQuery.of(context).size.height * 0.04,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.grey.withOpacity(0.5),
                   ),
                 ),
               ),
