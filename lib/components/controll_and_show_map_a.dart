@@ -10,8 +10,8 @@ import 'package:path_planning/components/my_button.dart';
 import 'package:path_planning/components/my_switch_button.dart';
 
 class ControllAndShowMapForA extends StatefulWidget {
-  final String _fileName;
-  ControllAndShowMapForA(this._fileName);
+  final String _mapData;
+  ControllAndShowMapForA(this._mapData);
   @override
   _ControllAndShowMapForAState createState() => _ControllAndShowMapForAState();
 }
@@ -125,7 +125,7 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
           child: Container(
             height: double.infinity,
             padding: EdgeInsets.all(30),
-            child: ShowMapForA(key: showMapKeyForA, fileName: widget._fileName),
+            child: ShowMapForA(key: showMapKeyForA, mapData: widget._mapData),
           ),
         ),
       ],

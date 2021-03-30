@@ -6,8 +6,8 @@ import 'package:path_planning/components/controll_and_show_map_rrt.dart';
 
 class MapShow extends StatelessWidget {
   final String _algorithmName;
-  final String _fileName;
-  MapShow(this._algorithmName, this._fileName);
+  final String _mapData;
+  MapShow(this._algorithmName, this._mapData);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,10 +60,10 @@ class MapShow extends StatelessWidget {
         ],
       ),
       body: _algorithmName == 'A*'
-          ? ControllAndShowMapForA(_fileName)
+          ? ControllAndShowMapForA(_mapData)
           : _algorithmName == 'RRT*'
-              ? ControllAndShowMapForRRT(_fileName)
-              : ControllAndShowMapForAnt(_fileName),
+              ? ControllAndShowMapForRRT(_mapData)
+              : ControllAndShowMapForAnt(_mapData),
     );
   }
 }

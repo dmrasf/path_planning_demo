@@ -8,8 +8,8 @@ import 'dart:io';
 import 'dart:math';
 
 class ShowMapForRRT extends StatefulWidget {
-  final String fileName;
-  ShowMapForRRT({Key key, this.fileName}) : super(key: key);
+  final String mapData;
+  ShowMapForRRT({Key key, this.mapData}) : super(key: key);
   @override
   ShowMapForRRTState createState() => ShowMapForRRTState();
 }
@@ -83,10 +83,8 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
 
   Future<void> getMapAnimation() async {
     try {
-      File f = File(widget.fileName);
-      String mapStr = await f.readAsString();
-      _myMap = jsonDecode(mapStr);
-      String visualPointStr = await buildMap(widget.fileName);
+      _myMap = jsonDecode(widget.mapData);
+      String visualPointStr = await buildMap(widget.mapData);
       Map<String, dynamic> tmpPoints = jsonDecode(visualPointStr);
       _visualPoints = tmpPoints['visual_points'];
       _visualGraph = tmpPoints['visual_graph'];

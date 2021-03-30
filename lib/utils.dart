@@ -8,6 +8,14 @@ final GlobalKey showMapKeyForA = GlobalKey();
 final GlobalKey showMapKeyForAnt = GlobalKey();
 final GlobalKey showMapKeyForRRT = GlobalKey();
 final GlobalKey showPathDiatance = GlobalKey();
+final List<String> mapData = [
+  'assets/maps/map_data_1.json',
+  'assets/maps/map_data_2.json',
+  'assets/maps/map_data_3.json',
+  'assets/maps/map_data_4.json',
+  'assets/maps/map_data_5.json',
+  'assets/maps/map_data_6.json',
+];
 
 Future<String> pickFile(String extension) async {
   bool _noExtension = false;

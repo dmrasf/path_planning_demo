@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,8 +9,8 @@ import 'package:path_planning/components/line.dart';
 import 'package:path_planning/utils.dart';
 
 class ShowMapForAnt extends StatefulWidget {
-  final String fileName;
-  ShowMapForAnt({Key key, this.fileName}) : super(key: key);
+  final String mapData;
+  ShowMapForAnt({Key key, this.mapData}) : super(key: key);
   @override
   ShowMapForAntState createState() => ShowMapForAntState();
 }
@@ -102,10 +101,8 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   void _getMapAnimation() async {
     try {
-      File f = File(widget.fileName);
-      String mapStr = await f.readAsString();
-      _myMap = jsonDecode(mapStr);
-      String visualPointStr = await buildMap(widget.fileName);
+      _myMap = jsonDecode(widget.mapData);
+      String visualPointStr = await buildMap(widget.mapData);
       Map<String, dynamic> tmpPoints = jsonDecode(visualPointStr);
       _visualPoints = tmpPoints['visual_points'];
       _visualGraph = tmpPoints['visual_graph'];

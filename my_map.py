@@ -14,16 +14,10 @@ ContourOrder = Enum('ContourOrder', ('Counterclockwise', 'Clockwise'))
 class Map:
     """构建地图方法类"""
 
-    def __init__(self, path):
+    def __init__(self, data):
         """构建地图"""
         contents = dict()
-        try:
-            with open(path, 'r') as j:
-                contents = json.loads(j.read())
-            j.close()
-        except Exception as _:
-            print("读取文件失败")
-            exit(0)
+        contents = json.loads(data)
         try:
             self.__width = contents['width']
             self.__heigth = contents['heigth']

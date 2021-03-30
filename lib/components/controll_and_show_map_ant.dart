@@ -10,8 +10,8 @@ import 'package:path_planning/components/my_slider.dart';
 import 'package:path_planning/components/my_button.dart';
 
 class ControllAndShowMapForAnt extends StatefulWidget {
-  final String _fileName;
-  ControllAndShowMapForAnt(this._fileName);
+  final String _mapData;
+  ControllAndShowMapForAnt(this._mapData);
   @override
   _ControllAndShowMapForAntState createState() =>
       _ControllAndShowMapForAntState();
@@ -201,7 +201,7 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
             padding: EdgeInsets.all(30),
             child: ShowMapForAnt(
               key: showMapKeyForAnt,
-              fileName: widget._fileName,
+              mapData: widget._mapData,
             ),
           ),
         ),

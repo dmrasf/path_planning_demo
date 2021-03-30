@@ -10,8 +10,8 @@ import 'package:path_planning/components/my_button.dart';
 import 'package:path_planning/components/my_switch_button.dart';
 
 class ControllAndShowMapForRRT extends StatefulWidget {
-  final String _fileName;
-  ControllAndShowMapForRRT(this._fileName);
+  final String _mapData;
+  ControllAndShowMapForRRT(this._mapData);
   @override
   _ControllAndShowMapForRRTState createState() =>
       _ControllAndShowMapForRRTState();
@@ -125,7 +125,7 @@ class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
             padding: EdgeInsets.all(30),
             child: ShowMapForRRT(
               key: showMapKeyForRRT,
-              fileName: widget._fileName,
+              mapData: widget._mapData,
             ),
           ),
         ),

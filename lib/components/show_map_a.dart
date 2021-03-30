@@ -5,12 +5,11 @@ import 'package:path_planning/components/my_painter.dart';
 import 'package:path_planning/utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 class ShowMapForA extends StatefulWidget {
-  final String fileName;
-  ShowMapForA({Key key, this.fileName}) : super(key: key);
+  final String mapData;
+  ShowMapForA({Key key, this.mapData}) : super(key: key);
   @override
   ShowMapForAState createState() => ShowMapForAState();
 }
@@ -82,10 +81,8 @@ class ShowMapForAState extends State<ShowMapForA>
   /// 从地图文件解析可视点 保存到本地变量
   Future<void> _getMapAnimation() async {
     try {
-      File f = File(widget.fileName);
-      String mapStr = await f.readAsString();
-      _myMap = jsonDecode(mapStr);
-      String visualPointStr = await buildMap(widget.fileName);
+      _myMap = jsonDecode(widget.mapData);
+      String visualPointStr = await buildMap(widget.mapData);
       Map<String, dynamic> tmpPoints = jsonDecode(visualPointStr);
       _visualPoints = tmpPoints['visual_points'];
       _visualGraph = tmpPoints['visual_graph'];
@@ -171,7 +168,7 @@ class ShowMapForAState extends State<ShowMapForA>
     );
     for (int i = 0; i < _pathRoute.length; i++) {
       _i = i;
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(Duration(milliseconds: 50));
     }
   }
 
