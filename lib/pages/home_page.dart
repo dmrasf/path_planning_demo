@@ -101,9 +101,11 @@ class _ChangeThemeButtonState extends State<ChangeThemeButton> {
         _isLight = !_isLight;
         provider.changeTheme(_isLight);
       }),
-      child: Icon(_isLight ? Icons.nightlight_round : Icons.brightness_high),
+      child: Icon(
+        _isLight ? Icons.nightlight_round : Icons.brightness_high,
+        color: _isLight ? Colors.black : Colors.white,
+      ),
       style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all(Colors.black),
         minimumSize: MaterialStateProperty.all(Size.zero),
       ),
     );

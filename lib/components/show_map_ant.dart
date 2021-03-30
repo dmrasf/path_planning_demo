@@ -37,7 +37,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   List<List<int>> _antsPos = [];
   List<int> _pathRoute = [];
   List<int> _pathRouteOp = [];
-  bool _isShowOp = false;
+  bool _isShowFliter = false;
   int _currentIter = 0;
   int _i = 0;
   bool _isShowAnts = false;
@@ -48,6 +48,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   bool _isShowIter = false;
   List<int> _preBest = [];
   double _preBestDistance = double.infinity;
+  bool _isOp = false;
 
   @override
   void initState() {
@@ -82,7 +83,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
                       this._i,
                       this._pathRoute,
                       this._pathRouteOp,
-                      this._isShowOp,
+                      this._isShowFliter,
                       this._antsPos,
                       this._isShowAnts,
                       this._isShowAxis,
@@ -117,10 +118,15 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     setState(() {});
   }
 
-  void toggleShowOp(bool isShow) {
-    _isShowOp = isShow;
+  void toggleShowOp(bool isOp) {
+    _isOp = isOp;
+  }
+
+  void toggleShowFliter(bool isShow) {
+    _isShowFliter = isShow;
     (showPathDiatance.currentState as ShowPathDistanceState).update(
-      calculatePathDistance(_visualGraph, _isShowOp ? _pathRouteOp : _pathRoute)
+      calculatePathDistance(
+              _visualGraph, _isShowFliter ? _pathRouteOp : _pathRoute)
           .toStringAsFixed(2),
     );
   }
@@ -209,7 +215,8 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       _state = 'Success !';
     _optimisingPath();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
-      calculatePathDistance(_visualGraph, _isShowOp ? _pathRouteOp : _pathRoute)
+      calculatePathDistance(
+              _visualGraph, _isShowFliter ? _pathRouteOp : _pathRoute)
           .toStringAsFixed(2),
     );
     // 路径生成动画
@@ -323,7 +330,9 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     for (int i = 0; i < _visualPoints.length - 1; i++)
       for (int j = i; j < _visualPoints.length; j++) {
         if (_visualGraph[i][j] <= 0) continue;
-        if (_pathPhermonone[i][j] > 0.15) _pathPhermonone[i][j] *= (1 - _p);
+        // 优化部分
+        if (_pathPhermonone[i][j] > 0.15 || !_isOp)
+          _pathPhermonone[i][j] *= (1 - _p);
         _pathPhermonone[j][i] = _pathPhermonone[i][j];
       }
     double distance = double.infinity;
@@ -339,13 +348,16 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       }
     }
     if (best.isEmpty) return;
+
+    // 优化部分
     if (_preBest.isEmpty || distance <= _preBestDistance) {
       _preBest = best;
       _preBestDistance = distance;
-    } else {
+    } else if (_isOp) {
       distance = _preBestDistance;
       best = _preBest;
     }
+
     double deltaP = _antPheromone / distance;
     for (int i = 0; i < best.length - 2; i++) {
       _pathPhermonone[best[i]][best[i + 1]] += deltaP;
@@ -387,7 +399,7 @@ class PainteAnt extends MapPainter {
   final int _i;
   final List<int> _pathRoute;
   final List<int> _pathRouteOp;
-  final bool _isShowOp;
+  final bool _isShowFliter;
   final List<List<int>> _antsPos;
   final bool _isShowAnts;
   final bool _isShowAxis;
@@ -401,7 +413,7 @@ class PainteAnt extends MapPainter {
     this._i,
     this._pathRoute,
     this._pathRouteOp,
-    this._isShowOp,
+    this._isShowFliter,
     this._antsPos,
     this._isShowAnts,
     this._isShowAxis,
@@ -421,7 +433,7 @@ class PainteAnt extends MapPainter {
     super.drawBarriers(canvas, size, myPaint, k);
     if (_isShowAxis) drawAxis(canvas, size, myPaint, k);
     drawPhermone(canvas, size, myPaint, k);
-    if (_isShowOp)
+    if (_isShowFliter)
       super.drawPathRoute(canvas, size, myPaint, k, _pathRouteOp, Colors.green,
           Colors.green.shade900, _pathRouteOp.length);
     else

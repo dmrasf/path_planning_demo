@@ -145,6 +145,7 @@ class ShowMapForAState extends State<ShowMapForA>
     List<int> newPoint = [];
     while (true) {
       newPoint = _updateOpenPoints(currentPoint);
+      // 优化部分
       if (_isOp) _changeParent(newPoint);
       currentPoint = _findNextPoint(currentPoint, hWeight, gWeight);
       _state = 'Update close set';

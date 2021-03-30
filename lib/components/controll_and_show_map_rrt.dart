@@ -75,7 +75,7 @@ class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
                 Column(
                   children: [
                     MySwitchButton(false, 'RRT*', '过滤', SwitchType.Op),
-                    MySwitchButton(false, 'RRT*', '显示坐标', SwitchType.Axis),
+                    MySwitchButton(false, 'RRT*', '坐标', SwitchType.Axis),
                   ],
                 ),
                 MySlider('RRT*'),

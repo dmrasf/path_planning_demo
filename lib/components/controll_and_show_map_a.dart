@@ -74,8 +74,8 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                 Column(
                   children: [
                     MySwitchButton(false, 'A*', '优化', SwitchType.Op),
-                    MySwitchButton(false, 'A*', '显示坐标', SwitchType.Axis),
-                    MySwitchButton(false, 'A*', '显示树', SwitchType.Tree),
+                    MySwitchButton(false, 'A*', '坐标', SwitchType.Axis),
+                    MySwitchButton(false, 'A*', '结点', SwitchType.Tree),
                   ],
                 ),
                 MySlider('A*'),

@@ -24,7 +24,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
   List<dynamic> _visualGraph;
   List<int> _pathRoute = [];
   List<int> _pathRouteOp = [];
-  bool _isShowOp = false;
+  bool _isShowFliter = false;
   bool _isShowAxis = false;
   String _remindStr = '正在读取地图';
   int _speed = 300;
@@ -68,7 +68,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
                   this._visualPoints,
                   this._pathRoute,
                   this._pathRouteOp,
-                  this._isShowOp,
+                  this._isShowFliter,
                   this._isShowAxis,
                   this._state,
                   this._tree,
@@ -108,8 +108,8 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     _isShowAxis = isShow;
   }
 
-  void toggleShowOp(bool isShow) {
-    _isShowOp = isShow;
+  void toggleShowFliter(bool isShow) {
+    _isShowFliter = isShow;
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       _calculatePathDistance().toStringAsFixed(2),
     );
@@ -205,7 +205,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
   double _calculatePathDistance() {
     double pathDistance = 0;
     List<int> tmp;
-    if (_isShowOp)
+    if (_isShowFliter)
       tmp = List.from(_pathRouteOp);
     else
       tmp = List.from(_pathRoute);
@@ -325,7 +325,7 @@ class PainteRRT extends MapPainter {
   final List<int> _pathRoute;
   final String _state;
   final List<int> _pathRouteOp;
-  final bool _isShowOp;
+  final bool _isShowFliter;
   final bool _isShowAxis;
   final Map<int, int> _tree;
   final int _i;
@@ -335,7 +335,7 @@ class PainteRRT extends MapPainter {
     this._visualPoints,
     this._pathRoute,
     this._pathRouteOp,
-    this._isShowOp,
+    this._isShowFliter,
     this._isShowAxis,
     this._state,
     this._tree,
@@ -355,7 +355,7 @@ class PainteRRT extends MapPainter {
     Paint myPaint = Paint()..color = Colors.black;
     super.drawBarriers(canvas, size, myPaint, k);
     if (_isShowAxis) super.drawAxis(canvas, size, myPaint, k);
-    if (_isShowOp)
+    if (_isShowFliter)
       super.drawPathRoute(canvas, size, myPaint, k, _pathRouteOp, Colors.green,
           Colors.green.shade900, _pathRouteOp.length);
     else
