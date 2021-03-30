@@ -224,7 +224,7 @@ class ShowMapForAState extends State<ShowMapForA>
         List.generate(newPoint.length, (i) => _tree[newPoint[i]]);
     while (true) {
       for (int p in newPoint) {
-        double distance = double.infinity;
+        double distance = _calculatePathDis(p, true);
         for (int parent in _closePoints.union(_openPoints)) {
           double tmp = _visualGraph[parent][p];
           if (tmp <= 0) continue;
