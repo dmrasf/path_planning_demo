@@ -51,6 +51,11 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
               () => fadeChangePage(context, ChooseMap(widget.algorithmName)),
               'Choose map',
             ),
+            SizedBox(height: 30),
+            MyShowMapButton(
+              () => null,
+              'Random map',
+            ),
           ],
         ),
       ),

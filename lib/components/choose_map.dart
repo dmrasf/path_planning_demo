@@ -69,25 +69,13 @@ class _MapItemState extends State<MapItem> {
         margin: EdgeInsets.all(10),
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.4),
+          color: Colors.grey.withOpacity(0.25),
         ),
         child: Stack(
           children: [
             CustomPaint(
               painter: PainteSimple(myMap),
               size: MediaQuery.of(context).size,
-            ),
-            Positioned(
-              child: Text(
-                mapName,
-                style: GoogleFonts.maShanZheng(
-                  textStyle: TextStyle(
-                    fontSize: MediaQuery.of(context).size.height * 0.04,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                ),
-              ),
             ),
           ],
         ),
