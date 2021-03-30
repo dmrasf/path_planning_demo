@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:path_planning/pages/map_show.dart';
 import 'package:path_planning/utils.dart';
 import 'package:path_planning/components/my_painter.dart';
@@ -18,13 +17,15 @@ class ChooseMap extends StatelessWidget {
         centerTitle: true,
       ),
       body: Container(
-        child: GridView(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-          ),
-          children: List.generate(
-            mapData.length,
-            (i) => MapItem(mapData[i], _algorithmName),
+        child: LayoutBuilder(
+          builder: (context, constraints) => GridView(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: constraints.maxWidth ~/ 320 + 1,
+            ),
+            children: List.generate(
+              mapData.length,
+              (i) => MapItem(mapData[i], _algorithmName),
+            ),
           ),
         ),
       ),
