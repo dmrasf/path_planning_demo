@@ -39,7 +39,7 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
           child: Container(
             width: 200,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).backgroundColor,
               boxShadow: [BoxShadow(color: Color(0x2f000000), blurRadius: 1.0)],
             ),
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),

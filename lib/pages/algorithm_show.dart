@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:path_planning/utils.dart';
 import 'package:path_planning/pages/map_show.dart';
 import 'package:path_planning/components/my_button.dart';
@@ -15,7 +16,12 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.algorithmName),
+        title: Text(
+          widget.algorithmName,
+          style: GoogleFonts.jua(
+            textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+          ),
+        ),
         centerTitle: true,
       ),
       body: Center(

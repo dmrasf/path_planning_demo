@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'dart:math' show Random;
 
-final GlobalKey mainPageKey = GlobalKey();
 final GlobalKey showMapKeyForA = GlobalKey();
 final GlobalKey showMapKeyForAnt = GlobalKey();
 final GlobalKey showMapKeyForRRT = GlobalKey();

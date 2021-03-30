@@ -25,7 +25,7 @@ class HomePage extends StatelessWidget {
                   textStyle: TextStyle(
                     fontSize: MediaQuery.of(context).size.height * 0.04,
                     decoration: TextDecoration.none,
-                    color: Colors.black,
+                    color: Theme.of(context).textTheme.headline1.color,
                   ),
                 ),
               ),
