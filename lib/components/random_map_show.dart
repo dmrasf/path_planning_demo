@@ -40,12 +40,13 @@ class _RandomMapShowState extends State<RandomMapShow> {
     _focusNodeWT.unfocus();
     _focusNodeBS.unfocus();
     _focusNodeHB.unfocus();
+    _focusNodeB.unfocus();
     _focusNodeWB.unfocus();
     _walls = RandomMapGeneration(
       widthBlock:
-          _controllerWB.text.isEmpty ? 16 : int.parse(_controllerWB.text),
+          _controllerWB.text.isEmpty ? 20 : int.parse(_controllerWB.text),
       heigthBlock:
-          _controllerHB.text.isEmpty ? 12 : int.parse(_controllerHB.text),
+          _controllerHB.text.isEmpty ? 20 : int.parse(_controllerHB.text),
       blankSize:
           _controllerBS.text.isEmpty ? 1.2 : double.parse(_controllerBS.text),
       wallThickness:
