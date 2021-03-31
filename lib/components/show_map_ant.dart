@@ -328,7 +328,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       for (int j = i; j < _visualPoints.length; j++) {
         if (_visualGraph[i][j] <= 0) continue;
         // 优化部分
-        if (_pathPhermonone[i][j] > 0.15 || !_isOp)
+        if (_pathPhermonone[i][j] > 0.1 || !_isOp)
           _pathPhermonone[i][j] *= (1 - _p);
         _pathPhermonone[j][i] = _pathPhermonone[i][j];
       }

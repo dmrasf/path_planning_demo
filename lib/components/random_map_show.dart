@@ -24,8 +24,8 @@ class _RandomMapShowState extends State<RandomMapShow> {
     _walls = RandomMapGeneration(
       widthBlock: 15,
       heigthBlock: 10,
-      blankSize: 0.6,
-      wallThickness: 0.1,
+      blankSize: 1.2,
+      wallThickness: 0.2,
       border: 0.4,
     ).randomMapGeneration();
     setState(() {});
@@ -48,7 +48,10 @@ class _RandomMapShowState extends State<RandomMapShow> {
         ],
       ),
       body: Container(
-        padding: EdgeInsets.all(30),
+        padding: EdgeInsets.symmetric(
+          vertical: MediaQuery.of(context).size.height * 0.15,
+          horizontal: MediaQuery.of(context).size.width * 0.15,
+        ),
         child: _walls.isEmpty
             ? Container()
             : CustomPaint(

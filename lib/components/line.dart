@@ -113,12 +113,7 @@ class _LinePathForAntState extends State<LinePathForAnt> {
         widget._pathDistance.length,
         (i) => FlSpot(
           i.toDouble(),
-          double.parse((widget._pathDistance[i] == 0
-                  ? (widget._pathDistance.reduce(min) +
-                          widget._pathDistance.reduce(max)) /
-                      2
-                  : widget._pathDistance[i])
-              .toStringAsFixed(2)),
+          double.parse(widget._pathDistance[i].toStringAsFixed(2)),
         ),
       ),
       isCurved: false,

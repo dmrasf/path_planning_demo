@@ -87,7 +87,7 @@ class MapPainter extends CustomPainter {
         style: GoogleFonts.jua(
           textStyle: TextStyle(
             color: textColor,
-            fontSize: k * 10,
+            fontSize: k * 7,
           ),
         ),
       );
