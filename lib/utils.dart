@@ -193,12 +193,14 @@ class RandomMapGeneration {
   final int heigthBlock;
   final int blocksLength;
   final Set<int> allBlocks;
+  final bool isRemove;
   RandomMapGeneration({
     this.blankSize = 0.6,
     this.wallThickness = 0.15,
     this.border = 0.4,
     this.widthBlock = 14,
     this.heigthBlock = 14,
+    this.isRemove = false,
   })  : blocksLength = widthBlock * heigthBlock,
         allBlocks = List.generate(widthBlock * heigthBlock, (i) => i).toSet();
 
@@ -229,6 +231,31 @@ class RandomMapGeneration {
         closeBlocks.add(current);
         if (closeBlocks.length == blocksLength) break;
         current = openBlocks.last;
+      }
+    }
+
+    if (isRemove) {
+      Set<int> randomChange = {};
+      for (int i = 0; i < horizontal.length ~/ 2; i++) {
+        while (randomChange.length < horizontal.length ~/ 2) {
+          int n = Random(Timeline.now).nextInt(horizontal.length);
+          if (!randomChange.contains(n)) randomChange.add(n);
+        }
+      }
+      for (int p in randomChange) {
+        for (int i = 0; i < widthBlock ~/ 4; i++)
+          horizontal[p][Random(Timeline.now).nextInt(widthBlock)] = 0;
+      }
+      randomChange.clear();
+      for (int i = 0; i < vertical.length ~/ 2; i++) {
+        while (randomChange.length < vertical.length ~/ 2) {
+          int n = Random(Timeline.now).nextInt(vertical.length);
+          if (!randomChange.contains(n)) randomChange.add(n);
+        }
+      }
+      for (int p in randomChange) {
+        for (int i = 0; i < heigthBlock ~/ 4; i++)
+          vertical[p][Random(Timeline.now).nextInt(heigthBlock)] = 0;
       }
     }
 
