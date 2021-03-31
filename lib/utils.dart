@@ -235,9 +235,14 @@ class RandomMapGeneration {
     walls['horizontal'] = horizontal;
     walls['vertical'] = vertical;
     walls['border'] = border;
+    walls['widthBlock'] = widthBlock;
+    walls['heigthBlock'] = heigthBlock;
     walls['blankSize'] = blankSize;
     walls['wallThickness'] = wallThickness;
     walls['type'] = 'random map';
+    walls['name'] = 'random map';
+    walls['grid'] = 0.05;
+    walls['robotSize'] = 0.3;
     return walls;
   }
 

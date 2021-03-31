@@ -4,6 +4,7 @@ import 'package:path_planning/utils.dart';
 import 'package:path_planning/pages/map_show.dart';
 import 'package:path_planning/components/my_button.dart';
 import 'package:path_planning/components/choose_map.dart';
+import 'package:path_planning/components/random_map_show.dart';
 import 'dart:io';
 
 class AlgorithmShow extends StatefulWidget {
@@ -53,10 +54,7 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
             ),
             SizedBox(height: 30),
             MyShowMapButton(
-              () {
-                Map<String, dynamic> walls =
-                    RandomMapGeneration().randomMapGeneration();
-              },
+              () => fadeChangePage(context, RandomMapShow()),
               'Random map',
             ),
           ],

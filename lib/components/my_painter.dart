@@ -13,7 +13,15 @@ class MapPainter extends CustomPainter {
   double _grid;
   double _robotSize;
   String _mapName;
+  String _type;
   List<dynamic> _barriers;
+  double _blankSize;
+  double _wallThickness;
+  double _border;
+  int _widthBlock;
+  int _heigthBlock;
+  List<dynamic> _horizontalWall;
+  List<dynamic> _verticalWall;
 
   double get width => _width;
   double get heigth => _heigth;
@@ -91,34 +99,123 @@ class MapPainter extends CustomPainter {
 
   bool parseData() {
     try {
-      _width = _myMap['width'].toDouble();
-      _heigth = _myMap['heigth'].toDouble();
-      _grid = _myMap['grid'].toDouble();
-      _robotSize = _myMap['robotSize'].toDouble();
-      _barriers = _myMap['barriers'];
-      _mapName = _myMap['name'];
+      _type = _myMap['type'];
     } catch (e) {
       print(e.toString());
       return false;
+    }
+    if (_type == 'custom map') {
+      try {
+        _width = _myMap['width'].toDouble();
+        _heigth = _myMap['heigth'].toDouble();
+        _grid = _myMap['grid'].toDouble();
+        _robotSize = _myMap['robotSize'].toDouble();
+        _barriers = _myMap['barriers'];
+        _mapName = _myMap['name'];
+      } catch (e) {
+        print(e.toString());
+        return false;
+      }
+    } else if (_type == 'random map') {
+      try {
+        _widthBlock = _myMap['widthBlock'].toInt();
+        _heigthBlock = _myMap['heigthBlock'].toInt();
+        _blankSize = _myMap['blankSize'].toDouble();
+        _border = _myMap['border'].toDouble();
+        _wallThickness = _myMap['wallThickness'].toDouble();
+        _width = _border * 2 +
+            _blankSize * _widthBlock +
+            _wallThickness * (_widthBlock - 1);
+        _heigth = _border * 2 +
+            _blankSize * _heigthBlock +
+            _wallThickness * (_heigthBlock - 1);
+        _grid = _myMap['grid'].toDouble();
+        _robotSize = _myMap['robotSize'].toDouble();
+        _mapName = _myMap['name'];
+        _horizontalWall = _myMap['horizontal'];
+        _verticalWall = _myMap['vertical'];
+      } catch (e) {
+        print(e.toString());
+        return false;
+      }
     }
     return true;
   }
 
   void drawBarriers(Canvas canvas, Size size, Paint myPaint, double k) {
-    for (int i = 0; i < _barriers.length; i++) {
-      Path path = Path();
-      for (int j = 0; j < _barriers[i].length; j++) {
-        double y = _barriers[i][j]['pointX'] / _grid * k +
-            (size.height - k * (_heigth / _grid)) / 2;
-        double x = _barriers[i][j]['pointY'] / _grid * k +
-            (size.width - k * (_width / _grid)) / 2;
-        if (j == 0)
-          path..moveTo(x, y);
-        else
-          path..lineTo(x, y);
+    double addHeight = (size.height - k * (_heigth / _grid)) / 2;
+    double addWidth = (size.width - k * (_width / _grid)) / 2;
+    if (_type == 'custom map') {
+      for (int i = 0; i < _barriers.length; i++) {
+        Path path = Path();
+        for (int j = 0; j < _barriers[i].length; j++) {
+          double y = _barriers[i][j]['pointX'] / _grid * k + addHeight;
+          double x = _barriers[i][j]['pointY'] / _grid * k + addWidth;
+          if (j == 0)
+            path..moveTo(x, y);
+          else
+            path..lineTo(x, y);
+        }
+        path..close();
+        canvas.drawPath(path, myPaint);
       }
-      path..close();
-      canvas.drawPath(path, myPaint);
+    } else if (_type == 'random map') {
+      Size wallH = Size(_wallThickness / _grid * k,
+          (_blankSize + _wallThickness * 2) / _grid * k);
+      Size wallW = Size((_blankSize + _wallThickness * 2) / _grid * k,
+          _wallThickness / _grid * k);
+      for (int i = 0; i < _horizontalWall.length; i++) {
+        for (int j = 0; j < _horizontalWall[i].length; j++) {
+          if (_horizontalWall[i][j] == 0) continue;
+          Offset p = Offset(
+            (_border + _blankSize * j + _wallThickness * j) / _grid * k +
+                addWidth -
+                _wallThickness / _grid * k,
+            (_border + _blankSize * (i + 1) + _wallThickness * i) / _grid * k +
+                addHeight,
+          );
+          canvas.drawRect(p & wallW, myPaint);
+        }
+      }
+      for (int i = 0; i < _verticalWall.length; i++) {
+        for (int j = 0; j < _verticalWall[i].length; j++) {
+          if (_verticalWall[i][j] == 0) continue;
+          Offset p = Offset(
+            (_border + _blankSize * (i + 1) + _wallThickness * i) / _grid * k +
+                addWidth,
+            (_border + _blankSize * j + _wallThickness * j) / _grid * k +
+                addHeight -
+                _wallThickness / _grid * k,
+          );
+          canvas.drawRect(p & wallH, myPaint);
+        }
+      }
+      Offset leftTop = Offset(
+        (_border - _wallThickness) / _grid * k + addWidth,
+        (_border - _wallThickness) / _grid * k + addHeight,
+      );
+      double width = (_width - 2 * _border + 2 * _wallThickness) / _grid * k;
+      double heigth = (_heigth - 2 * _border + 2 * _wallThickness) / _grid * k;
+      canvas.drawRect(
+        leftTop & Size(_wallThickness / _grid * k, heigth),
+        myPaint,
+      );
+      canvas.drawRect(
+        leftTop + Offset(width - _wallThickness / _grid * k, 0) &
+            Size(_wallThickness / _grid * k, heigth),
+        myPaint,
+      );
+      double inte = (_robotSize / 2 + _wallThickness) / _grid * k;
+      canvas.drawRect(
+        leftTop + Offset(inte, 0) &
+            Size(width - inte, _wallThickness / _grid * k),
+        myPaint,
+      );
+      canvas.drawRect(
+        leftTop + Offset(0, heigth - _wallThickness / _grid * k) &
+            Size(width, _wallThickness / _grid * k),
+        myPaint,
+      );
     }
   }
 
