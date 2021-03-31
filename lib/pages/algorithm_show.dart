@@ -54,7 +54,8 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
             ),
             SizedBox(height: 30),
             MyShowMapButton(
-              () => fadeChangePage(context, RandomMapShow()),
+              () =>
+                  fadeChangePage(context, RandomMapShow(widget.algorithmName)),
               'Random map',
             ),
           ],

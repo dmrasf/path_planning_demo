@@ -168,9 +168,8 @@ class MapPainter extends CustomPainter {
         for (int j = 0; j < _horizontalWall[i].length; j++) {
           if (_horizontalWall[i][j] == 0) continue;
           Offset p = Offset(
-            (_border + _blankSize * j + _wallThickness * j) / _grid * k +
-                addWidth -
-                _wallThickness / _grid * k,
+            (_border + _blankSize * j + _wallThickness * (j - 1)) / _grid * k +
+                addWidth,
             (_border + _blankSize * (i + 1) + _wallThickness * i) / _grid * k +
                 addHeight,
           );
@@ -183,9 +182,8 @@ class MapPainter extends CustomPainter {
           Offset p = Offset(
             (_border + _blankSize * (i + 1) + _wallThickness * i) / _grid * k +
                 addWidth,
-            (_border + _blankSize * j + _wallThickness * j) / _grid * k +
-                addHeight -
-                _wallThickness / _grid * k,
+            (_border + _blankSize * j + _wallThickness * (j - 1)) / _grid * k +
+                addHeight,
           );
           canvas.drawRect(p & wallH, myPaint);
         }

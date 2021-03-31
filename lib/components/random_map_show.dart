@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:path_planning/components/my_painter.dart';
 import 'package:path_planning/utils.dart';
+import 'dart:convert';
+import 'package:path_planning/pages/map_show.dart';
 
 class RandomMapShow extends StatefulWidget {
+  final String _algorithmName;
+  RandomMapShow(this._algorithmName);
   @override
   _RandomMapShowState createState() => _RandomMapShowState();
 }
@@ -18,11 +22,11 @@ class _RandomMapShowState extends State<RandomMapShow> {
 
   void _getNewMap() {
     _walls = RandomMapGeneration(
-      widthBlock: 30,
-      heigthBlock: 30,
+      widthBlock: 15,
+      heigthBlock: 10,
       blankSize: 0.6,
       wallThickness: 0.1,
-      border: 1,
+      border: 0.4,
     ).randomMapGeneration();
     setState(() {});
   }
@@ -53,7 +57,12 @@ class _RandomMapShowState extends State<RandomMapShow> {
               ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => _walls.isEmpty
+            ? null
+            : fadeChangePage(
+                context,
+                MapShow(widget._algorithmName, jsonEncode(_walls)),
+              ),
         child: Icon(Icons.play_arrow),
       ),
     );

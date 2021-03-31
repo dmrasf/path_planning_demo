@@ -243,6 +243,15 @@ class RandomMapGeneration {
     walls['name'] = 'random map';
     walls['grid'] = 0.05;
     walls['robotSize'] = 0.3;
+    walls['start'] = [border + blankSize / 2, border + blankSize / 2];
+    walls['end'] = [
+      border +
+          (heigthBlock - 0.5) * blankSize +
+          (heigthBlock - 1) * wallThickness,
+      border +
+          (widthBlock - 0.5) * blankSize +
+          (widthBlock - 1) * wallThickness,
+    ];
     return walls;
   }
 

@@ -19,27 +19,71 @@ class Map:
         contents = dict()
         contents = json.loads(data)
         try:
-            self.__width = contents['width']
-            self.__heigth = contents['heigth']
-            self.__grid = contents['grid']
-            self.__start_point = contents['start']
-            self.__end_point = contents['end']
-            self.__robot_size = contents['robotSize']
-            self.__barriers = contents['barriers']
-            self.__w_grid = math.ceil(self.__width/self.__grid)
-            self.__h_grid = math.ceil(self.__heigth/self.__grid)
-            self.__my_map = np.zeros(
-                (self.__h_grid, self.__w_grid), dtype='uint8')
-            self.__my_map[self.__my_map == 0] = 255
-            self.__draw_barriers()
-            self.__fillHole()
-            self.__needExpansionGrid = math.ceil(
-                (self.__robot_size-self.__grid)/2/self.__grid)
-            if self.__needExpansionGrid < 0:
-                self.__needExpansionGrid = 0
-            self.__expanded = self.__expand_map(self.__needExpansionGrid)
-            self.__my_map[self.__expanded[0], self.__expanded[1]] = 0
+            self.__type = contents['type']
         except Exception as _:
+            print("地图格式错误")
+            exit(0)
+        if self.__type == 'custom map':
+            try:
+                self.__width = contents['width']
+                self.__heigth = contents['heigth']
+                self.__grid = contents['grid']
+                self.__start_point = contents['start']
+                self.__end_point = contents['end']
+                self.__robot_size = contents['robotSize']
+                self.__barriers = contents['barriers']
+                self.__w_grid = math.ceil(self.__width/self.__grid)
+                self.__h_grid = math.ceil(self.__heigth/self.__grid)
+                self.__my_map = np.zeros(
+                    (self.__h_grid, self.__w_grid), dtype='uint8')
+                self.__my_map[self.__my_map == 0] = 255
+                self.__draw_barriers()
+                self.__fillHole()
+                self.__needExpansionGrid = math.ceil(
+                    (self.__robot_size-self.__grid)/2/self.__grid)
+                if self.__needExpansionGrid < 0:
+                    self.__needExpansionGrid = 0
+                self.__expanded = self.__expand_map(self.__needExpansionGrid)
+                self.__my_map[self.__expanded[0], self.__expanded[1]] = 0
+            except Exception as _:
+                print("地图格式错误")
+                exit(0)
+        elif self.__type == 'random map':
+            try:
+                self.__width_block = contents['widthBlock']
+                self.__heigth_block = contents['heigthBlock']
+                self.__blank_size = contents['blankSize']
+                self.__border = contents['border']
+                self.__start_point = contents['start']
+                self.__end_point = contents['end']
+                self.__wall_thickness = contents['wallThickness']
+                self.__width = self.__border*2+self.__blank_size * \
+                    self.__width_block + self.__wall_thickness * \
+                    (self.__width_block-1)
+                self.__heigth = self.__border*2+self.__blank_size * \
+                    self.__heigth_block + self.__wall_thickness * \
+                    (self.__heigth_block-1)
+                self.__grid = contents['grid']
+                self.__robot_size = contents['robotSize']
+                self.__horizontall_wall = contents['horizontal']
+                self.__vertical_wall = contents['vertical']
+                self.__w_grid = math.ceil(self.__width/self.__grid)
+                self.__h_grid = math.ceil(self.__heigth/self.__grid)
+                self.__my_map = np.zeros(
+                    (self.__h_grid, self.__w_grid), dtype='uint8')
+                self.__my_map[self.__my_map == 0] = 255
+                self.__draw_barriers()
+                self.__fillHole()
+                self.__needExpansionGrid = math.ceil(
+                    (self.__robot_size-self.__grid)/2/self.__grid)
+                if self.__needExpansionGrid < 0:
+                    self.__needExpansionGrid = 0
+                self.__expanded = self.__expand_map(self.__needExpansionGrid)
+                self.__my_map[self.__expanded[0], self.__expanded[1]] = 0
+            except Exception as _:
+                print("地图格式错误")
+                exit(0)
+        else:
             print("地图格式错误")
             exit(0)
 
@@ -148,10 +192,49 @@ class Map:
 
     def __draw_barriers(self):
         """绘制障碍"""
-        for barrier in self.__barriers:
-            for i in range(len(barrier)):
-                self.__draw_line(barrier[i], barrier[(i+1) % len(barrier)])
-        pass
+        if self.__type == 'custom map':
+            for barrier in self.__barriers:
+                for i in range(len(barrier)):
+                    self.__draw_line(barrier[i], barrier[(i+1) % len(barrier)])
+        elif self.__type == 'random map':
+            wall_width = math.ceil(
+                (self.__blank_size + 2*self.__wall_thickness)/self.__grid)
+            wall_heigth = math.ceil(self.__wall_thickness/self.__grid)
+            for i in range(len(self.__horizontall_wall)):
+                for j in range(len(self.__horizontall_wall[i])):
+                    if self.__horizontall_wall[i][j] == 0:
+                        continue
+                    x = math.ceil((self.__border + self.__blank_size*(i+1) +
+                                   self.__wall_thickness*i)/self.__grid)
+                    y = math.ceil((self.__border + self.__blank_size*j +
+                                   self.__wall_thickness*(j-1))/self.__grid)
+                    self.__my_map[x:x+wall_heigth, y:y+wall_width] = 0
+            for i in range(len(self.__vertical_wall)):
+                for j in range(len(self.__vertical_wall[i])):
+                    if self.__vertical_wall[i][j] == 0:
+                        continue
+                    x = math.ceil((self.__border + self.__blank_size*j +
+                                   self.__wall_thickness*(j-1))/self.__grid)
+                    y = math.ceil((self.__border + self.__blank_size*(i+1) +
+                                   self.__wall_thickness*i)/self.__grid)
+                    self.__my_map[x:x+wall_width, y:y+wall_heigth] = 0
+            pos = math.ceil(
+                (self.__border-self.__wall_thickness)/self.__grid)
+            pos_left_top = [pos, pos]
+            heigth = math.ceil((self.__heigth - 2*self.__border +
+                                2*self.__wall_thickness)/self.__grid)
+            width = math.ceil((self.__width - 2*self.__border +
+                               2*self.__wall_thickness)/self.__grid)
+            self.__my_map[pos_left_top[0]:pos_left_top[0]+heigth,
+                          pos_left_top[1]:pos_left_top[1]+wall_heigth] = 0
+            self.__my_map[pos_left_top[0]:pos_left_top[0]+wall_heigth,
+                          pos_left_top[1]+math.ceil(self.__robot_size/2/self.__grid)+wall_heigth:pos_left_top[1]+width] = 0
+            pos_right_top = [pos, pos + width-wall_heigth]
+            self.__my_map[pos_right_top[0]:pos_right_top[0]+heigth,
+                          pos_right_top[1]:pos_right_top[1]+wall_heigth] = 0
+            pos_left_bottom = [pos + heigth-wall_heigth, pos]
+            self.__my_map[pos_left_bottom[0]:pos_left_bottom[0]+wall_heigth,
+                          pos_left_bottom[1]:pos_left_bottom[1]+width] = 0
 
     def __get_contours_right_bottom_point(self, open_set, contour_order: ContourOrder):
         n = 0
@@ -186,14 +269,14 @@ class Map:
         for i in range(len(contours_points[0])):
             open_set.add((contours_points[0][i], contours_points[1][i]))
         while True:
-            right_bottom_point, current_point = \
-                self.__get_contours_right_bottom_point(open_set, contour_order)
+            right_bottom_point, current_point = self.__get_contours_right_bottom_point(
+                open_set, contour_order)
             open_set.remove(right_bottom_point)
             open_set.remove(current_point)
             contour = [right_bottom_point, current_point]
             while True:
-                current_point = \
-                    self.__get_next_contour_point(open_set, current_point)
+                current_point = self.__get_next_contour_point(
+                    open_set, current_point)
                 if current_point is None:
                     contours.append(contour.copy())
                     contour.clear()
