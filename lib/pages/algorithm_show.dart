@@ -53,7 +53,10 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
             ),
             SizedBox(height: 30),
             MyShowMapButton(
-              () => null,
+              () {
+                Map<String, dynamic> walls =
+                    RandomMapGeneration().randomMapGeneration();
+              },
               'Random map',
             ),
           ],

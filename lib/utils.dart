@@ -1,3 +1,5 @@
+import 'dart:collection';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -181,4 +183,98 @@ double calculatePathDistance(
     pathDistance += visualGraph[pathRoute[i]][pathRoute[i + 1]];
   }
   return pathDistance;
+}
+
+class RandomMapGeneration {
+  final double blankSize;
+  final double wallThickness;
+  final double border;
+  final int widthBlock;
+  final int heigthBlock;
+  final int blocksLength;
+  final Set<int> allBlocks;
+  RandomMapGeneration({
+    this.blankSize = 0.6,
+    this.wallThickness = 0.15,
+    this.border = 0.4,
+    this.widthBlock = 14,
+    this.heigthBlock = 14,
+  })  : blocksLength = widthBlock * heigthBlock,
+        allBlocks = List.generate(widthBlock * heigthBlock, (i) => i).toSet();
+
+  Map<String, dynamic> randomMapGeneration() {
+    Map<String, dynamic> walls = {};
+    List<List<int>> horizontal = List.generate(
+      heigthBlock - 1,
+      (_) => List.generate(widthBlock, (_) => 1),
+    );
+    List<List<int>> vertical = List.generate(
+      widthBlock - 1,
+      (_) => List.generate(heigthBlock, (_) => 1),
+    );
+
+    Set<int> closeBlocks = {};
+    Queue<int> openBlocks = Queue<int>();
+    int start = Random(Timeline.now).nextInt(blocksLength);
+    int current = start;
+    openBlocks.addLast(current);
+    while (true) {
+      int next = _getNextBlock(current, openBlocks.toSet().union(closeBlocks));
+      if (next != -1) {
+        _changeWall(current, next, horizontal, vertical);
+        openBlocks.addLast(next);
+        current = next;
+      } else {
+        current = openBlocks.removeLast();
+        closeBlocks.add(current);
+        if (closeBlocks.length == blocksLength) break;
+        current = openBlocks.last;
+      }
+    }
+
+    walls['horizontal'] = horizontal;
+    walls['vertical'] = vertical;
+    walls['border'] = border;
+    walls['blankSize'] = blankSize;
+    walls['wallThickness'] = wallThickness;
+    walls['type'] = 'random map';
+    return walls;
+  }
+
+  List<int> _toXY(int current) {
+    int x = current ~/ widthBlock;
+    int y = current % widthBlock;
+    return [x, y];
+  }
+
+  int _getNextBlock(int current, Set<int> oldBlocks) {
+    int top = current - widthBlock;
+    int bottom = current + widthBlock;
+    int left = current - 1;
+    int right = current + 1;
+    List<int> blocks = [];
+    if (top >= 0) blocks.add(top);
+    if (bottom <= blocksLength - 1) blocks.add(bottom);
+    blocks.addAll([left, right]);
+    if (current % widthBlock == 0) blocks.remove(left);
+    if (current % widthBlock == widthBlock - 1) blocks.remove(right);
+    blocks = blocks.toSet().difference(oldBlocks).toList();
+    if (blocks.isEmpty) return -1;
+    return blocks[Random(Timeline.now).nextInt(blocks.length)];
+  }
+
+  void _changeWall(
+    int current,
+    int next,
+    List<List<int>> horizontal,
+    List<List<int>> vertical,
+  ) {
+    List<int> cXY = _toXY(current);
+    List<int> nXY = _toXY(next);
+    int w = -1, h = -1;
+    if (cXY[0] != nXY[0]) w = cXY[0] > nXY[0] ? nXY[0] : cXY[0];
+    if (cXY[1] != nXY[1]) h = cXY[1] > nXY[1] ? nXY[1] : cXY[1];
+    if (w != -1) horizontal[w][cXY[1]] = 0;
+    if (h != -1) vertical[h][cXY[0]] = 0;
+  }
 }
