@@ -5,11 +5,9 @@ import 'package:path_planning/components/my_button.dart';
 import 'package:path_planning/components/my_textfield.dart';
 import 'package:path_planning/utils.dart';
 import 'dart:convert';
-import 'package:path_planning/pages/map_show.dart';
+import 'package:path_planning/pages/algorithm_show.dart';
 
 class RandomMapShow extends StatefulWidget {
-  final String _algorithmName;
-  RandomMapShow(this._algorithmName);
   @override
   _RandomMapShowState createState() => _RandomMapShowState();
 }
@@ -150,7 +148,7 @@ class _RandomMapShowState extends State<RandomMapShow> {
             ? null
             : fadeChangePage(
                 context,
-                MapShow(widget._algorithmName, jsonEncode(_walls)),
+                AlgorithmShow(jsonEncode(_walls)),
               ),
         child: Icon(Icons.play_arrow),
       ),

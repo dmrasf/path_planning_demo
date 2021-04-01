@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_planning/pages/map_show.dart';
+import 'package:path_planning/pages/algorithm_show.dart';
 import 'package:path_planning/utils.dart';
 import 'package:path_planning/components/my_painter.dart';
 import 'dart:convert';
 
 class ChooseMap extends StatelessWidget {
-  final String _algorithmName;
-  ChooseMap(this._algorithmName);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +21,7 @@ class ChooseMap extends StatelessWidget {
             ),
             children: List.generate(
               mapData.length,
-              (i) => MapItem(mapData[i], _algorithmName),
+              (i) => MapItem(mapData[i]),
             ),
           ),
         ),
@@ -35,8 +32,7 @@ class ChooseMap extends StatelessWidget {
 
 class MapItem extends StatefulWidget {
   final String _mapName;
-  final String _algorithmName;
-  MapItem(this._mapName, this._algorithmName);
+  MapItem(this._mapName);
   @override
   _MapItemState createState() => _MapItemState();
 }
@@ -64,7 +60,7 @@ class _MapItemState extends State<MapItem> {
     return GestureDetector(
       onTap: () => mapData.isEmpty
           ? null
-          : fadeChangePage(context, MapShow(widget._algorithmName, mapData)),
+          : fadeChangePage(context, AlgorithmShow(mapData)),
       child: Container(
         alignment: Alignment.center,
         margin: EdgeInsets.all(10),

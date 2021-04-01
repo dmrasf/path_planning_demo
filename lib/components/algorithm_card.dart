@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:path_planning/pages/algorithm_show.dart';
+import 'package:path_planning/pages/map_show.dart';
 import 'package:path_planning/utils.dart';
 
 class AlgorithmCard extends StatefulWidget {
   final String algorithmName;
-  AlgorithmCard(this.algorithmName);
+  final String mapData;
+  AlgorithmCard(this.algorithmName, this.mapData);
 
   @override
   _AlgorithmCardState createState() => _AlgorithmCardState();
@@ -22,7 +23,7 @@ class _AlgorithmCardState extends State<AlgorithmCard> {
     return TextButton(
       onPressed: () => fadeChangePage(
         context,
-        AlgorithmShow(widget.algorithmName),
+        MapShow(widget.algorithmName, widget.mapData),
       ),
       child: Text(widget.algorithmName),
       style: ButtonStyle(

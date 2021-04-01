@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_planning/components/algorithm_card.dart';
+import 'package:path_planning/pages/algorithm_show.dart';
+import 'package:path_planning/components/my_button.dart';
+import 'package:path_planning/components/choose_map.dart';
+import 'package:path_planning/components/random_map_show.dart';
 import 'package:path_planning/model.dart';
+import 'package:path_planning/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:io';
 
 class HomePage extends StatelessWidget {
   @override
@@ -48,33 +53,36 @@ class HomePage extends StatelessWidget {
             ],
           ),
           Spacer(),
-          Text(
-            'Path Planning',
-            style: GoogleFonts.lato(
-              textStyle: TextStyle(
-                color: Colors.black,
-                decoration: TextDecoration.none,
-                fontSize: MediaQuery.of(context).size.height * 0.06,
-              ),
-            ),
-          ),
-          Spacer(),
-          Container(
-            height: MediaQuery.of(context).size.height * 0.37,
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            color: Colors.transparent,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              physics: BouncingScrollPhysics(),
-              shrinkWrap: true,
-              children: <Widget>[
-                SizedBox(width: 30),
-                AlgorithmCard('A*'),
-                SizedBox(width: 30),
-                AlgorithmCard('Ant Colony'),
-                SizedBox(width: 30),
-                AlgorithmCard('RRT*'),
-                SizedBox(width: 30),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                MyShowMapButton(
+                  () => pickFile('json').then(
+                    (fileName) {
+                      if (fileName != null && fileName != '') {
+                        File f = File(fileName);
+                        f.readAsString().then(
+                              (value) => fadeChangePage(
+                                context,
+                                AlgorithmShow(value),
+                              ),
+                            );
+                      }
+                    },
+                  ),
+                  'Pick map file',
+                ),
+                SizedBox(height: 30),
+                MyShowMapButton(
+                  () => fadeChangePage(context, ChooseMap()),
+                  'Choose map',
+                ),
+                SizedBox(height: 30),
+                MyShowMapButton(
+                  () => fadeChangePage(context, RandomMapShow()),
+                  'Random map',
+                ),
               ],
             ),
           ),
