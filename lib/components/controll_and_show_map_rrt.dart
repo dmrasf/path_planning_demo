@@ -10,19 +10,21 @@ import 'package:path_planning/components/my_button.dart';
 import 'package:path_planning/components/my_switch_button.dart';
 
 class ControllAndShowMapForRRT extends StatefulWidget {
-  final String _mapData;
-  ControllAndShowMapForRRT(this._mapData);
+  final Map<String, dynamic> _myMap;
+  final List<dynamic> _visualPoints;
+  final List<dynamic> _visualGraph;
+  ControllAndShowMapForRRT(this._myMap, this._visualGraph, this._visualPoints);
   @override
   _ControllAndShowMapForRRTState createState() =>
       _ControllAndShowMapForRRTState();
 }
 
 class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
+  bool _isShow = true;
   TextEditingController _controllerR = TextEditingController();
   TextEditingController _controllerI = TextEditingController();
   FocusNode _focusNodeR = FocusNode();
   FocusNode _focusNodeI = FocusNode();
-  bool _isShow = false;
 
   @override
   void initState() {
@@ -125,7 +127,9 @@ class _ControllAndShowMapForRRTState extends State<ControllAndShowMapForRRT> {
             padding: EdgeInsets.all(30),
             child: ShowMapForRRT(
               key: showMapKeyForRRT,
-              mapData: widget._mapData,
+              myMap: widget._myMap,
+              visualGraph: widget._visualGraph,
+              visualPoints: widget._visualPoints,
             ),
           ),
         ),

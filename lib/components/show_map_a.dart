@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:path_planning/components/wait_show.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/my_painter.dart';
 import 'package:path_planning/utils.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:convert';
 import 'dart:math';
 
 class ShowMapForA extends StatefulWidget {
-  final String mapData;
-  ShowMapForA({Key key, this.mapData}) : super(key: key);
+  final Map<String, dynamic> myMap;
+  final List<dynamic> visualPoints;
+  final List<dynamic> visualGraph;
+  ShowMapForA({
+    Key key,
+    @required this.myMap,
+    @required this.visualGraph,
+    @required this.visualPoints,
+  }) : super(key: key);
   @override
   ShowMapForAState createState() => ShowMapForAState();
 }
 
 class ShowMapForAState extends State<ShowMapForA>
     with SingleTickerProviderStateMixin {
-  bool _isDone = false;
-  Map<String, dynamic> _myMap;
   AnimationController _controller;
-  List<dynamic> _visualPoints = [];
-  List<dynamic> _visualGraph;
   Set _openPoints = Set();
   Set _closePoints = Set();
   Map<int, int> _tree = Map<int, int>();
@@ -28,8 +29,6 @@ class ShowMapForAState extends State<ShowMapForA>
   Map<int, double> _openPointsValue = Map<int, double>();
   bool _isOp = false;
   List<int> _pathRoute = [];
-  String _remindStr = '正在读取地图';
-  bool _r = true;
   int _speed = 300;
   int _i = 0;
   String _state = '';
@@ -42,7 +41,6 @@ class ShowMapForAState extends State<ShowMapForA>
       vsync: this,
       duration: Duration(minutes: 100),
     );
-    _getMapAnimation();
     super.initState();
   }
 
@@ -54,45 +52,26 @@ class ShowMapForAState extends State<ShowMapForA>
 
   @override
   Widget build(BuildContext context) {
-    return _isDone
-        ? AnimatedBuilder(
-            animation: _controller,
-            builder: (_, __) {
-              return CustomPaint(
-                painter: PainteA(
-                  _myMap,
-                  this._visualPoints,
-                  this._openPoints,
-                  this._openPointsValue,
-                  this._tree,
-                  this._closePoints,
-                  this._pathRoute,
-                  this._isShowAxis,
-                  this._isShowTree,
-                  this._state,
-                  this._i,
-                ),
-              );
-            },
-          )
-        : WaitShow(_remindStr, _r);
-  }
-
-  /// 从地图文件解析可视点 保存到本地变量
-  Future<void> _getMapAnimation() async {
-    try {
-      _myMap = jsonDecode(widget.mapData);
-      String visualPointStr = await buildMap(widget.mapData);
-      Map<String, dynamic> tmpPoints = jsonDecode(visualPointStr);
-      _visualPoints = tmpPoints['visual_points'];
-      _visualGraph = tmpPoints['visual_graph'];
-      _isDone = true;
-    } catch (e) {
-      await Future.delayed(Duration(seconds: 1));
-      _remindStr = '解析失败，请重新选择！';
-      _r = false;
-    }
-    setState(() {});
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) {
+        return CustomPaint(
+          painter: PainteA(
+            widget.myMap,
+            widget.visualPoints,
+            this._openPoints,
+            this._openPointsValue,
+            this._tree,
+            this._closePoints,
+            this._pathRoute,
+            this._isShowAxis,
+            this._isShowTree,
+            this._state,
+            this._i,
+          ),
+        );
+      },
+    );
   }
 
   /// 改变动画速度
@@ -118,11 +97,10 @@ class ShowMapForAState extends State<ShowMapForA>
   /// 保存计算出的点
   Future<bool> save(String path) async {
     if (_pathRoute.isEmpty) return false;
-    return await saveRoute(path, _pathRoute, _myMap, _visualPoints);
+    return await saveRoute(path, _pathRoute, widget.myMap, widget.visualPoints);
   }
 
   void run(double hWeight, double gWeight) async {
-    if (!_isDone) return;
     if (hWeight + gWeight == 0) {
       showSnakBar(context, '参数不能同时为0');
       return;
@@ -136,7 +114,7 @@ class ShowMapForAState extends State<ShowMapForA>
     _pathRoute.clear();
     _i = 0;
     int start = 0;
-    int end = _visualPoints.length - 1;
+    int end = widget.visualPoints.length - 1;
     int currentPoint = start;
     _closePoints.add(currentPoint);
     List<int> newPoint = [];
@@ -164,7 +142,7 @@ class ShowMapForAState extends State<ShowMapForA>
     _state = 'Success !';
     _parsePathRoute();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
-      calculatePathDistance(_visualGraph, _pathRoute).toStringAsFixed(2),
+      calculatePathDistance(widget.visualGraph, _pathRoute).toStringAsFixed(2),
     );
     for (int i = 0; i < _pathRoute.length; i++) {
       _i = i;
@@ -181,15 +159,19 @@ class ShowMapForAState extends State<ShowMapForA>
     _openPointsValue.clear();
     double minDistance = double.infinity;
     int bestPoint;
-    int end = _visualPoints.length - 1;
-    double grid = _myMap['grid'];
+    int end = widget.visualPoints.length - 1;
+    double grid = widget.myMap['grid'];
     for (int p in _openPoints) {
       double h = pow(
-        pow((_visualPoints[end][0] - _visualPoints[p][0]) * grid, 2) +
-            pow((_visualPoints[end][1] - _visualPoints[p][1]) * grid, 2),
+        pow((widget.visualPoints[end][0] - widget.visualPoints[p][0]) * grid,
+                2) +
+            pow(
+                (widget.visualPoints[end][1] - widget.visualPoints[p][1]) *
+                    grid,
+                2),
         0.5,
       );
-      double g = _visualGraph[currentPoint][p];
+      double g = widget.visualGraph[currentPoint][p];
       double f = h * hWeight + g * gWeight;
       _openPointsValue[p] = f;
       if (f < minDistance) {
@@ -203,8 +185,8 @@ class ShowMapForAState extends State<ShowMapForA>
   /// 更新可以访问的点，并返回新加入的点
   List<int> _updateOpenPoints(int currentPoint) {
     List<int> newPoint = [];
-    for (int i = 0; i < _visualPoints.length; i++) {
-      if (_visualGraph[currentPoint][i] > 0 &&
+    for (int i = 0; i < widget.visualPoints.length; i++) {
+      if (widget.visualGraph[currentPoint][i] > 0 &&
           !_openPoints.contains(i) &&
           !_closePoints.contains(i)) {
         _tree[i] = currentPoint;
@@ -223,7 +205,7 @@ class ShowMapForAState extends State<ShowMapForA>
       for (int p in newPoint) {
         double distance = _calculatePathDis(p, true);
         for (int parent in _closePoints.union(_openPoints)) {
-          double tmp = _visualGraph[parent][p];
+          double tmp = widget.visualGraph[parent][p];
           if (tmp <= 0) continue;
           double parentDis = newPoint.contains(parent)
               ? _calculatePathDis(parent, true)
@@ -248,7 +230,8 @@ class ShowMapForAState extends State<ShowMapForA>
       List<int> path = [p];
       while (path[path.length - 1] != 0) {
         path.add(_tree[path[path.length - 1]]);
-        dis = dis + _visualGraph[path[path.length - 1]][path[path.length - 2]];
+        dis = dis +
+            widget.visualGraph[path[path.length - 1]][path[path.length - 2]];
       }
       _pointToStartDis[p] = dis;
     }
@@ -257,8 +240,8 @@ class ShowMapForAState extends State<ShowMapForA>
 
   /// 从树中解析路径
   void _parsePathRoute() {
-    _pathRoute = [_visualPoints.length - 1];
-    _pathRoute = [_visualPoints.length - 1];
+    _pathRoute = [widget.visualPoints.length - 1];
+    _pathRoute = [widget.visualPoints.length - 1];
     while (_pathRoute[_pathRoute.length - 1] != 0)
       _pathRoute.add(_tree[_pathRoute[_pathRoute.length - 1]]);
   }

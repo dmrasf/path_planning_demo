@@ -1,29 +1,28 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:path_planning/components/wait_show.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/my_painter.dart';
 import 'package:path_planning/components/line.dart';
 import 'package:path_planning/utils.dart';
 
 class ShowMapForAnt extends StatefulWidget {
-  final String mapData;
-  ShowMapForAnt({Key key, this.mapData}) : super(key: key);
+  final Map<String, dynamic> myMap;
+  final List<dynamic> visualPoints;
+  final List<dynamic> visualGraph;
+  ShowMapForAnt({
+    Key key,
+    @required this.myMap,
+    @required this.visualGraph,
+    @required this.visualPoints,
+  }) : super(key: key);
   @override
   ShowMapForAntState createState() => ShowMapForAntState();
 }
 
 class ShowMapForAntState extends State<ShowMapForAnt>
     with SingleTickerProviderStateMixin {
-  bool _isDone = false;
-  Map<String, dynamic> _myMap;
   AnimationController _controller;
-  String _remindStr = '正在读取地图';
-  bool _r = true;
-  List<dynamic> _visualPoints = [];
-  List<dynamic> _visualGraph;
   List<List<double>> _pathPhermonone = [];
   int _speed = 300;
   double _initPathPhermononeValue = 1;
@@ -55,7 +54,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       vsync: this,
       duration: Duration(minutes: 100),
     );
-    _getMapAnimation();
     super.initState();
   }
 
@@ -67,52 +65,34 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   @override
   Widget build(BuildContext context) {
-    return _isDone
-        ? (_isShowIter
-            ? LinePathForAnt(_iterationNumValue)
-            : AnimatedBuilder(
-                animation: _controller,
-                builder: (_, __) {
-                  return CustomPaint(
-                    painter: PainteAnt(
-                      _myMap,
-                      this._visualPoints,
-                      this._pathPhermonone,
-                      this._currentIter,
-                      this._i,
-                      this._pathRoute,
-                      this._pathRouteOp,
-                      this._isShowFliter,
-                      this._antsPos,
-                      this._isShowAnts,
-                      this._isShowAxis,
-                      this._state,
-                      this._animationForShowAntsi,
-                    ),
-                  );
-                },
-              ))
-        : WaitShow(_remindStr, _r);
+    return _isShowIter
+        ? LinePathForAnt(_iterationNumValue)
+        : AnimatedBuilder(
+            animation: _controller,
+            builder: (_, __) {
+              return CustomPaint(
+                painter: PainteAnt(
+                  widget.myMap,
+                  widget.visualPoints,
+                  this._pathPhermonone,
+                  this._currentIter,
+                  this._i,
+                  this._pathRoute,
+                  this._pathRouteOp,
+                  this._isShowFliter,
+                  this._antsPos,
+                  this._isShowAnts,
+                  this._isShowAxis,
+                  this._state,
+                  this._animationForShowAntsi,
+                ),
+              );
+            },
+          );
   }
 
   void changeAnimationi(int newValue) {
     _animationForShowAntsi = newValue;
-  }
-
-  void _getMapAnimation() async {
-    try {
-      _myMap = jsonDecode(widget.mapData);
-      String visualPointStr = await buildMap(widget.mapData);
-      Map<String, dynamic> tmpPoints = jsonDecode(visualPointStr);
-      _visualPoints = tmpPoints['visual_points'];
-      _visualGraph = tmpPoints['visual_graph'];
-      _isDone = true;
-    } catch (e) {
-      await Future.delayed(Duration(seconds: 1));
-      _remindStr = '解析失败，请重新选择！';
-      _r = false;
-    }
-    setState(() {});
   }
 
   void toggleShowOp(bool isOp) {
@@ -123,7 +103,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _isShowFliter = isShow;
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       calculatePathDistance(
-              _visualGraph, _isShowFliter ? _pathRouteOp : _pathRoute)
+              widget.visualGraph, _isShowFliter ? _pathRouteOp : _pathRoute)
           .toStringAsFixed(2),
     );
   }
@@ -148,17 +128,18 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   Future<bool> save(String path) async {
     if (_pathRouteOp.isEmpty) return false;
-    return await saveRoute(path, _pathRouteOp, _myMap, _visualPoints);
+    return await saveRoute(
+        path, _pathRouteOp, widget.myMap, widget.visualPoints);
   }
 
   double _initPathPher() {
     int eage = 0;
     double sum = 0;
-    for (int i = 0; i < _visualPoints.length - 1; i++) {
-      for (int j = i; j < _visualPoints.length; j++) {
-        if (_visualGraph[i][j] > 0) {
+    for (int i = 0; i < widget.visualPoints.length - 1; i++) {
+      for (int j = i; j < widget.visualPoints.length; j++) {
+        if (widget.visualGraph[i][j] > 0) {
           eage++;
-          sum += _visualGraph[i][j];
+          sum += widget.visualGraph[i][j];
         }
       }
     }
@@ -174,7 +155,6 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     double antPheromone,
     int iteration,
   ) async {
-    if (!_isDone) return;
     _antsNum = antsNum < 1 ? 1 : antsNum;
     _a = a;
     _b = b;
@@ -200,7 +180,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       _updatePathPhermonone();
       // 给折线图积累数据
       _iterationNumValue.add(calculatePathDistance(
-        _visualGraph,
+        widget.visualGraph,
         _parseFinalRoute(),
       ));
       await Future.delayed(Duration(milliseconds: _speed));
@@ -213,7 +193,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _optimisingPath();
     (showPathDiatance.currentState as ShowPathDistanceState).update(
       calculatePathDistance(
-              _visualGraph, _isShowFliter ? _pathRouteOp : _pathRoute)
+              widget.visualGraph, _isShowFliter ? _pathRouteOp : _pathRoute)
           .toStringAsFixed(2),
     );
     // 路径生成动画
@@ -229,7 +209,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     List<int> pathRoute = [0];
     while (true) {
       Map<int, double> path = {};
-      for (int i = 0; i < _visualPoints.length; i++)
+      for (int i = 0; i < widget.visualPoints.length; i++)
         if (_pathPhermonone[pathRoute[pathRoute.length - 1]][i] > 0)
           path[i] = _pathPhermonone[pathRoute[pathRoute.length - 1]][i];
       for (int p in pathRoute) path.remove(p);
@@ -246,7 +226,8 @@ class ShowMapForAntState extends State<ShowMapForAnt>
         break;
       }
       pathRoute.add(nextP);
-      if (pathRoute[pathRoute.length - 1] == _visualPoints.length - 1) break;
+      if (pathRoute[pathRoute.length - 1] == widget.visualPoints.length - 1)
+        break;
     }
     return pathRoute;
   }
@@ -254,10 +235,10 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   /// 初始化信息素
   void _initPathPhermonone() {
     _pathPhermonone.clear();
-    for (int i = 0; i < _visualPoints.length; i++) {
+    for (int i = 0; i < widget.visualPoints.length; i++) {
       List<double> tmp = [];
-      for (int j = 0; j < _visualPoints.length; j++) {
-        if (_visualGraph[i][j] <= 0)
+      for (int j = 0; j < widget.visualPoints.length; j++) {
+        if (widget.visualGraph[i][j] <= 0)
           tmp.add(0.0);
         else
           tmp.add(_initPathPhermononeValue);
@@ -274,8 +255,8 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   }
 
   double _calculateProbability(int p1, int p2) {
-    if (_visualGraph[p1][p2] <= 0) return 0;
-    double pathDistance = _visualGraph[p1][p2];
+    if (widget.visualGraph[p1][p2] <= 0) return 0;
+    double pathDistance = widget.visualGraph[p1][p2];
     return pow(_pathPhermonone[p1][p2], _a) * pow(1 / pathDistance, _b);
   }
 
@@ -284,12 +265,13 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     bool isAllArrived = true;
     _animationForShowAntsi = 0;
     for (List<int> antPath in _antsPos) {
-      if (antPath[antPath.length - 1] == _visualPoints.length - 1)
+      if (antPath[antPath.length - 1] == widget.visualPoints.length - 1)
         antPath.add(-2);
       if (antPath[antPath.length - 1] == -2 ||
           antPath[antPath.length - 1] == -1) continue;
       isAllArrived = false;
-      List<int> pointToSelected = List.generate(_visualPoints.length, (i) => i);
+      List<int> pointToSelected =
+          List.generate(widget.visualPoints.length, (i) => i);
       pointToSelected.remove(0);
       for (int pos in antPath) pointToSelected.remove(pos);
       List<double> probabilities = [];
@@ -324,9 +306,9 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   /// 更新信息素
   void _updatePathPhermonone() {
-    for (int i = 0; i < _visualPoints.length - 1; i++)
-      for (int j = i; j < _visualPoints.length; j++) {
-        if (_visualGraph[i][j] <= 0) continue;
+    for (int i = 0; i < widget.visualPoints.length - 1; i++)
+      for (int j = i; j < widget.visualPoints.length; j++) {
+        if (widget.visualGraph[i][j] <= 0) continue;
         // 优化部分
         if (_pathPhermonone[i][j] > 0.1 || !_isOp)
           _pathPhermonone[i][j] *= (1 - _p);
@@ -337,7 +319,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     for (List<int> antPath in _antsPos) {
       if (antPath[antPath.length - 1] != -1) {
         double tmp = calculatePathDistance(
-            _visualGraph, antPath.sublist(0, antPath.length - 1));
+            widget.visualGraph, antPath.sublist(0, antPath.length - 1));
         if (tmp < distance) {
           distance = tmp;
           best = antPath;
@@ -375,15 +357,15 @@ class ShowMapForAntState extends State<ShowMapForAnt>
       tmpi = 0;
       tmpPoint = 0;
       for (int j = i + 1; j < _pathRoute.length; j++)
-        if (_visualGraph[currentPoint][_pathRoute[j]] != -1) {
+        if (widget.visualGraph[currentPoint][_pathRoute[j]] != -1) {
           tmpPoint = _pathRoute[j];
           tmpi = j;
         }
       i = tmpi;
       currentPoint = tmpPoint;
       necessaryPath.add(currentPoint);
-      if (necessaryPath[necessaryPath.length - 1] == _visualPoints.length - 1)
-        break;
+      if (necessaryPath[necessaryPath.length - 1] ==
+          widget.visualPoints.length - 1) break;
     }
     _pathRouteOp = necessaryPath;
   }

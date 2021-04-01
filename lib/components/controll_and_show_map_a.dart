@@ -10,14 +10,16 @@ import 'package:path_planning/components/my_button.dart';
 import 'package:path_planning/components/my_switch_button.dart';
 
 class ControllAndShowMapForA extends StatefulWidget {
-  final String _mapData;
-  ControllAndShowMapForA(this._mapData);
+  final Map<String, dynamic> _myMap;
+  final List<dynamic> _visualPoints;
+  final List<dynamic> _visualGraph;
+  ControllAndShowMapForA(this._myMap, this._visualGraph, this._visualPoints);
   @override
   _ControllAndShowMapForAState createState() => _ControllAndShowMapForAState();
 }
 
 class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
-  bool _isShow = false;
+  bool _isShow = true;
   TextEditingController _controllerH = TextEditingController();
   TextEditingController _controllerG = TextEditingController();
   FocusNode _focusNodeH = FocusNode();
@@ -125,7 +127,12 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
           child: Container(
             height: double.infinity,
             padding: EdgeInsets.all(30),
-            child: ShowMapForA(key: showMapKeyForA, mapData: widget._mapData),
+            child: ShowMapForA(
+              key: showMapKeyForA,
+              myMap: widget._myMap,
+              visualGraph: widget._visualGraph,
+              visualPoints: widget._visualPoints,
+            ),
           ),
         ),
       ],

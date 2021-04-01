@@ -10,15 +10,17 @@ import 'package:path_planning/components/my_slider.dart';
 import 'package:path_planning/components/my_button.dart';
 
 class ControllAndShowMapForAnt extends StatefulWidget {
-  final String _mapData;
-  ControllAndShowMapForAnt(this._mapData);
+  final Map<String, dynamic> _myMap;
+  final List<dynamic> _visualPoints;
+  final List<dynamic> _visualGraph;
+  ControllAndShowMapForAnt(this._myMap, this._visualGraph, this._visualPoints);
   @override
   _ControllAndShowMapForAntState createState() =>
       _ControllAndShowMapForAntState();
 }
 
 class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
-  bool _isShow = false;
+  bool _isShow = true;
   TextEditingController _controllerAntsNum = TextEditingController();
   TextEditingController _controllerA = TextEditingController();
   TextEditingController _controllerB = TextEditingController();
@@ -201,7 +203,9 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
             padding: EdgeInsets.all(30),
             child: ShowMapForAnt(
               key: showMapKeyForAnt,
-              mapData: widget._mapData,
+              myMap: widget._myMap,
+              visualGraph: widget._visualGraph,
+              visualPoints: widget._visualPoints,
             ),
           ),
         ),

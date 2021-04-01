@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:path_planning/components/wait_show.dart';
 import 'package:path_planning/components/show_distance.dart';
 import 'package:path_planning/components/my_painter.dart';
 import 'package:path_planning/utils.dart';
@@ -8,28 +7,29 @@ import 'dart:io';
 import 'dart:math';
 
 class ShowMapForRRT extends StatefulWidget {
-  final String mapData;
-  ShowMapForRRT({Key key, this.mapData}) : super(key: key);
+  final Map<String, dynamic> myMap;
+  final List<dynamic> visualPoints;
+  final List<dynamic> visualGraph;
+  ShowMapForRRT({
+    Key key,
+    @required this.myMap,
+    @required this.visualGraph,
+    @required this.visualPoints,
+  }) : super(key: key);
   @override
   ShowMapForRRTState createState() => ShowMapForRRTState();
 }
 
 class ShowMapForRRTState extends State<ShowMapForRRT>
     with SingleTickerProviderStateMixin {
-  bool _isDone = false;
-  Map<String, dynamic> _myMap;
   double _grid;
   AnimationController _controller;
-  List<dynamic> _visualPoints = [];
-  List<dynamic> _visualGraph;
   List<int> _pathRoute = [];
   List<int> _pathRouteOp = [];
   bool _isShowFliter = false;
   bool _isShowAxis = false;
-  String _remindStr = '正在读取地图';
   int _speed = 300;
   String _state = '';
-  bool _r = true;
   int _iterationNum = 1000;
   Map<int, int> _tree = Map<int, int>();
   Set _closePoints = Set();
@@ -46,7 +46,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
       vsync: this,
       duration: Duration(minutes: 100),
     );
-    getMapAnimation();
+    _grid = widget.myMap['grid'].toDouble();
     super.initState();
   }
 
@@ -58,44 +58,25 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
 
   @override
   Widget build(BuildContext context) {
-    return _isDone
-        ? AnimatedBuilder(
-            animation: _controller,
-            builder: (_, __) {
-              return CustomPaint(
-                painter: PainteRRT(
-                  this._myMap,
-                  this._visualPoints,
-                  this._pathRoute,
-                  this._pathRouteOp,
-                  this._isShowFliter,
-                  this._isShowAxis,
-                  this._state,
-                  this._tree,
-                  this._i,
-                  this._radius,
-                ),
-              );
-            },
-          )
-        : WaitShow(_remindStr, _r);
-  }
-
-  Future<void> getMapAnimation() async {
-    try {
-      _myMap = jsonDecode(widget.mapData);
-      String visualPointStr = await buildMap(widget.mapData);
-      Map<String, dynamic> tmpPoints = jsonDecode(visualPointStr);
-      _visualPoints = tmpPoints['visual_points'];
-      _visualGraph = tmpPoints['visual_graph'];
-      _grid = _myMap['grid'].toDouble();
-      _isDone = true;
-    } catch (e) {
-      await Future.delayed(Duration(milliseconds: 500));
-      _remindStr = '解析失败，请重新选择！';
-      _r = false;
-    }
-    setState(() {});
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) {
+        return CustomPaint(
+          painter: PainteRRT(
+            widget.myMap,
+            widget.visualPoints,
+            this._pathRoute,
+            this._pathRouteOp,
+            this._isShowFliter,
+            this._isShowAxis,
+            this._state,
+            this._tree,
+            this._i,
+            this._radius,
+          ),
+        );
+      },
+    );
   }
 
   void changeSpeed(int newSpeed) {
@@ -115,17 +96,17 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
 
   Future<bool> save(String path) async {
     if (_pathRouteOp.isEmpty) return false;
-    double grid = _myMap['grid'].toDouble();
-    List<dynamic> start = _myMap['start'];
-    List<dynamic> end = _myMap['end'];
+    double grid = widget.myMap['grid'].toDouble();
+    List<dynamic> start = widget.myMap['start'];
+    List<dynamic> end = widget.myMap['end'];
     List<List<dynamic>> realPath = [start];
     for (int i = 1; i < _pathRouteOp.length - 1; i++)
       realPath.add([
         (num.parse(
-          (_visualPoints[_pathRouteOp[i]][0] * grid).toStringAsFixed(2),
+          (widget.visualPoints[_pathRouteOp[i]][0] * grid).toStringAsFixed(2),
         )),
         (num.parse(
-          (_visualPoints[_pathRouteOp[i]][1] * grid).toStringAsFixed(2),
+          (widget.visualPoints[_pathRouteOp[i]][1] * grid).toStringAsFixed(2),
         ))
       ]);
     realPath.add(end);
@@ -137,11 +118,15 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
   }
 
   void _getNearRadiusPoints() {
-    int end = _visualPoints.length - 1;
-    for (int i = 0; i < _visualPoints.length - 1; i++) {
+    int end = widget.visualPoints.length - 1;
+    for (int i = 0; i < widget.visualPoints.length - 1; i++) {
       double dis = pow(
-        pow((_visualPoints[end][0] - _visualPoints[i][0]) * _grid, 2) +
-            pow((_visualPoints[end][1] - _visualPoints[i][1]) * _grid, 2),
+        pow((widget.visualPoints[end][0] - widget.visualPoints[i][0]) * _grid,
+                2) +
+            pow(
+                (widget.visualPoints[end][1] - widget.visualPoints[i][1]) *
+                    _grid,
+                2),
         0.5,
       );
       if (dis <= _radius) _nearPoint.add(i);
@@ -149,13 +134,12 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
   }
 
   void _updateOpenPoints(int newPoint) {
-    for (int i = 0; i < _visualPoints.length; i++) {
-      if (_visualGraph[newPoint][i] > 0) _openPoints.add(i);
+    for (int i = 0; i < widget.visualPoints.length; i++) {
+      if (widget.visualGraph[newPoint][i] > 0) _openPoints.add(i);
     }
   }
 
   void run(double radius, int iterationNum) async {
-    if (!_isDone) return;
     _controller.reset();
     _controller.forward();
     _radius = radius;
@@ -168,6 +152,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     _i = 0;
     _pointToStartDis.clear();
     _nearPoint.clear();
+    print('========');
     _getNearRadiusPoints();
     int i = 0;
     for (; i < _iterationNum; i++) {
@@ -184,7 +169,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
       await Future.delayed(Duration(milliseconds: _speed));
       if (_isArrived(xNew)) {
         _state = 'Success !';
-        _tree[_visualPoints.length - 1] = xNew;
+        _tree[widget.visualPoints.length - 1] = xNew;
         _parsePathRoute();
         _optimisingPath();
         (showPathDiatance.currentState as ShowPathDistanceState).update(
@@ -208,7 +193,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     else
       tmp = List.from(_pathRoute);
     for (int i = 0; i < tmp.length - 1; i++) {
-      pathDistance += _visualGraph[tmp[i]][tmp[i + 1]];
+      pathDistance += widget.visualGraph[tmp[i]][tmp[i + 1]];
     }
     return pathDistance;
   }
@@ -224,27 +209,27 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
       tmpi = 0;
       tmpPoint = 0;
       for (int j = i + 1; j < tmpRoute.length; j++)
-        if (_visualGraph[currentPoint][tmpRoute[j]] != -1) {
+        if (widget.visualGraph[currentPoint][tmpRoute[j]] != -1) {
           tmpPoint = tmpRoute[j];
           tmpi = j;
         }
       i = tmpi;
       currentPoint = tmpPoint;
       necessaryPath.add(currentPoint);
-      if (necessaryPath[necessaryPath.length - 1] == _visualPoints.length - 1)
-        break;
+      if (necessaryPath[necessaryPath.length - 1] ==
+          widget.visualPoints.length - 1) break;
     }
     _pathRouteOp = necessaryPath;
   }
 
   void _parsePathRoute() {
-    _pathRoute = [_visualPoints.length - 1];
+    _pathRoute = [widget.visualPoints.length - 1];
     while (_pathRoute[_pathRoute.length - 1] != 0)
       _pathRoute.add(_tree[_pathRoute[_pathRoute.length - 1]]);
   }
 
   bool _isArrived(int xNew) {
-    double dis = _visualGraph[xNew][_visualPoints.length - 1];
+    double dis = widget.visualGraph[xNew][widget.visualPoints.length - 1];
     if (dis > 0) return true;
     return false;
   }
@@ -259,8 +244,8 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     double dis = _calculatePathDis(xNew);
     for (int p in _closePoints) {
       if (p == xNew || p == _tree[xNew]) continue;
-      if (_visualGraph[xNew][p] <= 0) continue;
-      double tmp = _visualGraph[xNew][p];
+      if (widget.visualGraph[xNew][p] <= 0) continue;
+      double tmp = widget.visualGraph[xNew][p];
       if (dis + tmp < _calculatePathDis(p)) {
         _tree[p] = xNew;
         _pointToStartDis[p] = dis + tmp;
@@ -285,7 +270,7 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     if (r > _rate) {
     } else {}
     while (true) {
-      int i = Random().nextInt(_visualPoints.length - 1) + 1;
+      int i = Random().nextInt(widget.visualPoints.length - 1) + 1;
       if (!_closePoints.contains(i)) return i;
     }
   }
@@ -294,8 +279,8 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
     double distance = double.infinity;
     int near = -1;
     for (int p in _closePoints) {
-      if (_visualGraph[p][xRand] <= 0) continue;
-      double tmp = _visualGraph[p][xRand] + _calculatePathDis(p);
+      if (widget.visualGraph[p][xRand] <= 0) continue;
+      double tmp = widget.visualGraph[p][xRand] + _calculatePathDis(p);
       if (tmp < distance) {
         distance = tmp;
         near = p;
@@ -310,7 +295,8 @@ class ShowMapForRRTState extends State<ShowMapForRRT>
       List<int> path = [p];
       while (path[path.length - 1] != 0) {
         path.add(_tree[path[path.length - 1]]);
-        dis = dis + _visualGraph[path[path.length - 1]][path[path.length - 2]];
+        dis = dis +
+            widget.visualGraph[path[path.length - 1]][path[path.length - 2]];
       }
       _pointToStartDis[p] = dis;
     }

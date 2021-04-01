@@ -5,8 +5,11 @@ import 'package:path_planning/utils.dart';
 
 class AlgorithmCard extends StatefulWidget {
   final String algorithmName;
-  final String mapData;
-  AlgorithmCard(this.algorithmName, this.mapData);
+  final Map<String, dynamic> myMap;
+  final List<dynamic> visualPoints;
+  final List<dynamic> visualGraph;
+  AlgorithmCard(
+      this.algorithmName, this.myMap, this.visualGraph, this.visualPoints);
 
   @override
   _AlgorithmCardState createState() => _AlgorithmCardState();
@@ -23,7 +26,12 @@ class _AlgorithmCardState extends State<AlgorithmCard> {
     return TextButton(
       onPressed: () => fadeChangePage(
         context,
-        MapShow(widget.algorithmName, widget.mapData),
+        MapShow(
+          widget.algorithmName,
+          widget.myMap,
+          widget.visualGraph,
+          widget.visualPoints,
+        ),
       ),
       child: Text(widget.algorithmName),
       style: ButtonStyle(

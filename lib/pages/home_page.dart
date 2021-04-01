@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
       height: double.infinity,
       width: double.infinity,
       alignment: Alignment.center,
-      padding: EdgeInsets.only(top: 20, left: 15, right: 15),
+      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
       child: Column(
         children: [
           Row(
@@ -62,12 +62,10 @@ class HomePage extends StatelessWidget {
                     (fileName) {
                       if (fileName != null && fileName != '') {
                         File f = File(fileName);
-                        f.readAsString().then(
-                              (value) => fadeChangePage(
-                                context,
-                                AlgorithmShow(value),
-                              ),
-                            );
+                        f.readAsString().then((value) => fadeChangePage(
+                              context,
+                              AlgorithmShow(value),
+                            ));
                       }
                     },
                   ),

@@ -30,21 +30,23 @@ class _WaitShowState extends State<WaitShow>
   @override
   Widget build(BuildContext context) {
     if (!widget._r) _controller.stop();
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        RotationTransition(
-          turns: _controller,
-          alignment: Alignment.center,
-          child: Container(
-            height: 30,
-            width: 30,
-            color: Colors.red,
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          RotationTransition(
+            turns: _controller,
+            alignment: Alignment.center,
+            child: Container(
+              height: 30,
+              width: 30,
+              color: Colors.red,
+            ),
           ),
-        ),
-        SizedBox(height: 20),
-        Text(widget._remindStr),
-      ],
+          SizedBox(height: 20),
+          Text(widget._remindStr),
+        ],
+      ),
     );
   }
 }
