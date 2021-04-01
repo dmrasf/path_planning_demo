@@ -10,6 +10,7 @@ final GlobalKey showMapKeyForA = GlobalKey();
 final GlobalKey showMapKeyForAnt = GlobalKey();
 final GlobalKey showMapKeyForRRT = GlobalKey();
 final GlobalKey showPathDiatance = GlobalKey();
+final GlobalKey randomMapKey = GlobalKey();
 final List<String> mapData = [
   'assets/maps/map_data_1.json',
   'assets/maps/map_data_2.json',
@@ -113,8 +114,8 @@ void showSnakBar(BuildContext context, String s) {
   );
 }
 
-void fadeChangePage(BuildContext context, Widget widget) {
-  Navigator.of(context).push(
+Future<void> fadeChangePage(BuildContext context, Widget widget) async {
+  return await Navigator.of(context).push(
     PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => widget,
       transitionsBuilder: (context, animation, secondaryAnimation, child) =>
@@ -130,8 +131,8 @@ void fadeChangePage(BuildContext context, Widget widget) {
   );
 }
 
-void slideChangePage(BuildContext context, Widget widget) {
-  Navigator.of(context).push(
+Future<void> slideChangePage(BuildContext context, Widget widget) async {
+  return await Navigator.of(context).push(
     PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => widget,
       transitionsBuilder: (context, animation, secondaryAnimation, child) =>

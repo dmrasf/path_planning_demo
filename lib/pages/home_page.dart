@@ -78,7 +78,10 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 30),
                 MyShowMapButton(
-                  () => fadeChangePage(context, RandomMapShow()),
+                  () => fadeChangePage(
+                    context,
+                    RandomMapShow(key: randomMapKey),
+                  ),
                   'Random map',
                 ),
               ],

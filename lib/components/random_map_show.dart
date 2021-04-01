@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:path_planning/pages/algorithm_show.dart';
 
 class RandomMapShow extends StatefulWidget {
+  RandomMapShow({Key key}) : super(key: key);
   @override
   _RandomMapShowState createState() => _RandomMapShowState();
 }
@@ -26,11 +27,24 @@ class _RandomMapShowState extends State<RandomMapShow> {
   FocusNode _focusNodeWT = FocusNode();
   FocusNode _focusNodeB = FocusNode();
   FocusNode _focusNodeRE = FocusNode();
+  List<double> _oldStart = [];
+  List<double> _oldEnd = [];
+
+  Offset _start = Offset(-1, -1);
+  Offset _end = Offset(-1, -1);
+  bool _isStart = true;
 
   @override
   void initState() {
     super.initState();
     _getNewMap();
+  }
+
+  void changeStartEnd(double startX, startY, endX, endY) {
+    if (_walls.isNotEmpty) {
+      _walls['start'] = [startX, startY];
+      _walls['end'] = [endX, endY];
+    }
   }
 
   void _getNewMap() {
@@ -56,6 +70,8 @@ class _RandomMapShowState extends State<RandomMapShow> {
               ? false
               : true,
     ).randomMapGeneration();
+    _oldStart = _walls['start'];
+    _oldEnd = _walls['end'];
     setState(() {});
   }
 
@@ -135,9 +151,22 @@ class _RandomMapShowState extends State<RandomMapShow> {
               ),
               child: _walls.isEmpty
                   ? Container()
-                  : CustomPaint(
-                      painter: PainteRandomMap(_walls),
-                      size: MediaQuery.of(context).size,
+                  : GestureDetector(
+                      onTapDown: (TapDownDetails details) {
+                        setState(() {
+                          if (_isStart) {
+                            _start = details.localPosition;
+                            _isStart = false;
+                          } else {
+                            _end = details.localPosition;
+                            _isStart = true;
+                          }
+                        });
+                      },
+                      child: CustomPaint(
+                        painter: PainteRandomMap(_walls, _start, _end),
+                        size: MediaQuery.of(context).size,
+                      ),
                     ),
             ),
           )
@@ -149,7 +178,15 @@ class _RandomMapShowState extends State<RandomMapShow> {
             : fadeChangePage(
                 context,
                 AlgorithmShow(jsonEncode(_walls)),
-              ),
+              ).then((value) {
+                setState(() {
+                  _start = Offset(-1, -1);
+                  _end = Offset(-1, -1);
+                  _walls['start'] = _oldStart;
+                  _walls['end'] = _oldEnd;
+                  _isStart = true;
+                });
+              }),
         child: Icon(Icons.play_arrow),
       ),
     );
@@ -157,9 +194,8 @@ class _RandomMapShowState extends State<RandomMapShow> {
 }
 
 class PainteRandomMap extends MapPainter {
-  PainteRandomMap(
-    _myMap,
-  ) : super(_myMap, []);
+  final Offset _start, _end;
+  PainteRandomMap(_myMap, this._start, this._end) : super(_myMap, []);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -171,6 +207,61 @@ class PainteRandomMap extends MapPainter {
         : size.height / gridHeigth;
     Paint myPaint = Paint()..color = Colors.black;
     super.drawBarriers(canvas, size, myPaint, k);
+    drawStartEnd(canvas, size, myPaint, k);
+  }
+
+  void drawStartEnd(Canvas canvas, Size size, Paint myPaint, double k) {
+    TextPainter tp = TextPainter(
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    TextSpan span = TextSpan();
+    if (_start != Offset(-1, -1)) {
+      canvas.drawCircle(_start, k * 5, myPaint..color = Colors.red);
+      span = TextSpan(
+        text: 'start',
+        style: GoogleFonts.sen(
+          textStyle: TextStyle(
+            color: Colors.blue,
+            fontSize: k * 25,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+      tp..text = span;
+      tp.layout();
+      tp.paint(canvas, _start + Offset(4, 4));
+    }
+    if (_end != Offset(-1, -1)) {
+      canvas.drawCircle(_end, k * 5, myPaint..color = Colors.red);
+      span = TextSpan(
+        text: 'end',
+        style: GoogleFonts.sen(
+          textStyle: TextStyle(
+            color: Colors.blue,
+            fontSize: k * 25,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+      tp..text = span;
+      tp.layout();
+      tp.paint(canvas, _end + Offset(4, 4));
+    }
+    if (_start != Offset(-1, -1) && _end != Offset(-1, -1)) {
+      double addHeight = (size.height - k * (super.heigth / super.grid)) / 2;
+      double addWidth = (size.width - k * (super.width / super.grid)) / 2;
+      double realStartX = (_start.dx - addWidth) / k * super.grid;
+      double realStartY = (_start.dy - addHeight) / k * super.grid;
+      double realEndX = (_end.dx - addWidth) / k * super.grid;
+      double realEndY = (_end.dy - addHeight) / k * super.grid;
+      (randomMapKey.currentState as _RandomMapShowState).changeStartEnd(
+        realStartY,
+        realStartX,
+        realEndY,
+        realEndX,
+      );
+    }
   }
 
   @override
