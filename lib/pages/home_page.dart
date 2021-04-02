@@ -26,9 +26,9 @@ class HomePage extends StatelessWidget {
             children: [
               Text(
                 'Algorithm demo',
-                style: GoogleFonts.gotu(
+                style: GoogleFonts.arvo(
                   textStyle: TextStyle(
-                    fontSize: MediaQuery.of(context).size.height * 0.04,
+                    fontSize: MediaQuery.of(context).size.height * 0.05,
                     decoration: TextDecoration.none,
                     color: Theme.of(context).textTheme.headline1.color,
                   ),
@@ -111,11 +111,13 @@ class _ChangeThemeButtonState extends State<ChangeThemeButton> {
         provider.changeTheme(_isLight);
       }),
       child: Icon(
-        _isLight ? Icons.nightlight_round : Icons.brightness_high,
+        _isLight ? Icons.bedtime : Icons.brightness_high,
+        size: 20,
         color: _isLight ? Colors.black : Colors.white,
       ),
       style: ButtonStyle(
         minimumSize: MaterialStateProperty.all(Size.zero),
+        overlayColor: MaterialStateProperty.all(Colors.transparent),
       ),
     );
   }
