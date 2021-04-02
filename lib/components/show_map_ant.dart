@@ -327,39 +327,43 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     for (int i = 0; i < widget.visualPoints.length - 1; i++)
       for (int j = i; j < widget.visualPoints.length; j++) {
         if (widget.visualGraph[i][j] <= 0) continue;
-        // 优化部分
         if (_pathPhermonone[i][j] > 0.1 || !_isOp)
           _pathPhermonone[i][j] *= (1 - _p);
         _pathPhermonone[j][i] = _pathPhermonone[i][j];
       }
-    double distance = double.infinity;
-    List<int> best = [];
-    for (List<int> antPath in _antsPos) {
-      if (antPath[antPath.length - 1] != -1) {
-        double tmp = calculatePathDistance(
-            widget.visualGraph, antPath.sublist(0, antPath.length - 1));
-        if (tmp < distance) {
-          distance = tmp;
-          best = antPath;
+
+    if (_isOp) {
+      // 优化部分
+      for (List<int> antPath in _antsPos) {
+        if (antPath[antPath.length - 1] != -1) {
+          double tmp = calculatePathDistance(
+              widget.visualGraph, antPath.sublist(0, antPath.length - 1));
+          if (tmp < _preBestDistance) {
+            _preBestDistance = tmp;
+            _preBest = antPath;
+          }
         }
       }
-    }
-    if (best.isEmpty) return;
-
-    // 优化部分
-    if (_preBest.isEmpty || distance <= _preBestDistance) {
-      _preBest = best;
-      _preBestDistance = distance;
-    } else if (_isOp) {
-      distance = _preBestDistance;
-      best = _preBest;
-    }
-
-    double deltaP = _antPheromone / distance;
-    for (int i = 0; i < best.length - 2; i++) {
-      _pathPhermonone[best[i]][best[i + 1]] += deltaP;
-      _pathPhermonone[best[i + 1]][best[i]] =
-          _pathPhermonone[best[i]][best[i + 1]];
+      if (_preBest.isEmpty) return;
+      double deltaP = _antPheromone / _preBestDistance;
+      for (int i = 0; i < _preBest.length - 2; i++) {
+        _pathPhermonone[_preBest[i]][_preBest[i + 1]] += deltaP;
+        _pathPhermonone[_preBest[i + 1]][_preBest[i]] =
+            _pathPhermonone[_preBest[i]][_preBest[i + 1]];
+      }
+    } else {
+      for (List<int> antPath in _antsPos) {
+        if (antPath[antPath.length - 1] != -1) {
+          double distance = calculatePathDistance(
+              widget.visualGraph, antPath.sublist(0, antPath.length - 1));
+          double deltaP = _antPheromone / distance;
+          for (int i = 0; i < antPath.length - 2; i++) {
+            _pathPhermonone[antPath[i]][antPath[i + 1]] += deltaP;
+            _pathPhermonone[antPath[i + 1]][antPath[i]] =
+                _pathPhermonone[antPath[i]][antPath[i + 1]];
+          }
+        }
+      }
     }
   }
 
