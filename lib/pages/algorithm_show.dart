@@ -79,9 +79,9 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
                         AlgorithmCard(
                             'Ant Colony', _myMap, _visualGraph, _visualPoints),
                         SizedBox(width: 30),
-                        AlgorithmCard(
-                            'RRT*', _myMap, _visualGraph, _visualPoints),
-                        SizedBox(width: 30),
+                        //AlgorithmCard(
+                        //'RRT*', _myMap, _visualGraph, _visualPoints),
+                        //SizedBox(width: 30),
                       ],
                     ),
                   ),

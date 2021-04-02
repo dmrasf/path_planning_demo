@@ -47,6 +47,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   List<int> _preBest = [];
   double _preBestDistance = double.infinity;
   bool _isOp = false;
+  bool _isReset = false;
 
   @override
   void initState() {
@@ -93,6 +94,10 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   void changeAnimationi(int newValue) {
     _animationForShowAntsi = newValue;
+  }
+
+  void reset() {
+    _isReset = true;
   }
 
   void toggleShowOp(bool isOp) {
@@ -147,6 +152,22 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     return sum;
   }
 
+  void initPara() {
+    _controller.reset();
+    _controller.forward();
+    _pathRoute.clear();
+    _pathRouteOp.clear();
+    _preBest.clear();
+    _preBestDistance = double.infinity;
+    _antsPos.clear();
+    _iterationNumValue.clear();
+    _currentIter = 0;
+    _i = 0;
+    _state = 'Running . . .';
+    _initPathPhermonone();
+    _isReset = false;
+  }
+
   Future<void> run(
     int antsNum,
     double a,
@@ -162,21 +183,18 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _antPheromone = antPheromone;
     _initPathPhermononeValue = _initPathPher();
     _iterationNum = iteration;
-    _controller.reset();
-    _controller.forward();
-    _pathRoute.clear();
-    _pathRouteOp.clear();
-    _preBest.clear();
-    _preBestDistance = double.infinity;
-    _iterationNumValue.clear();
-    _currentIter = 0;
-    _i = 0;
-    _state = 'Running . . .';
-    _initPathPhermonone();
+    initPara();
     for (int i = 0; i < _iterationNum; i++) {
       _currentIter = i + 1;
       _setAntsPosition();
-      while (true) if (await _selectNextPosForAnts()) break;
+      while (true) {
+        if (await _selectNextPosForAnts()) break;
+        if (_isReset) {
+          initPara();
+          await Future.delayed(Duration(milliseconds: 1));
+          return;
+        }
+      }
       _updatePathPhermonone();
       // 给折线图积累数据
       _iterationNumValue.add(calculatePathDistance(

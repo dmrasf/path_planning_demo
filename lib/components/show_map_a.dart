@@ -34,6 +34,7 @@ class ShowMapForAState extends State<ShowMapForA>
   String _state = '';
   bool _isShowAxis = false;
   bool _isShowTree = false;
+  bool _isReset = false;
 
   @override
   void initState() {
@@ -79,6 +80,10 @@ class ShowMapForAState extends State<ShowMapForA>
     _speed = newSpeed;
   }
 
+  void reset() {
+    _isReset = true;
+  }
+
   /// 是否显示坐标轴
   void toggleShowAxis(bool isShow) {
     _isShowAxis = isShow;
@@ -100,11 +105,7 @@ class ShowMapForAState extends State<ShowMapForA>
     return await saveRoute(path, _pathRoute, widget.myMap, widget.visualPoints);
   }
 
-  void run(double hWeight, double gWeight) async {
-    if (hWeight + gWeight == 0) {
-      showSnakBar(context, '参数不能同时为0');
-      return;
-    }
+  void initPara() {
     _controller.reset();
     _controller.forward();
     _closePoints.clear();
@@ -112,13 +113,27 @@ class ShowMapForAState extends State<ShowMapForA>
     _openPointsValue.clear();
     _tree.clear();
     _pathRoute.clear();
+    _isReset = false;
     _i = 0;
+  }
+
+  void run(double hWeight, double gWeight) async {
+    if (hWeight + gWeight == 0) {
+      showSnakBar(context, '参数不能同时为0');
+      return;
+    }
+    initPara();
     int start = 0;
     int end = widget.visualPoints.length - 1;
     int currentPoint = start;
     _closePoints.add(currentPoint);
     List<int> newPoint = [];
     while (true) {
+      if (_isReset) {
+        initPara();
+        await Future.delayed(Duration(milliseconds: 1));
+        return;
+      }
       newPoint = _updateOpenPoints(currentPoint);
       // 优化部分
       if (_isOp) _changeParent(newPoint);

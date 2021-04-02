@@ -110,6 +110,12 @@ class _ControllAndShowMapForAState extends State<ControllAndShowMapForA> {
                         ),
                       );
                     }, 'START'),
+                    SizedBox(height: 10),
+                    MyButton(() {
+                      _focusNodeH.unfocus();
+                      _focusNodeG.unfocus();
+                      (showMapKeyForA.currentState as ShowMapForAState).reset();
+                    }, 'RESET'),
                   ],
                 ),
               ],

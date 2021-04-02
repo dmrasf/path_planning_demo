@@ -35,8 +35,8 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               Spacer(),
-              ChangeThemeButton(),
-              SizedBox(width: 15),
+              //ChangeThemeButton(),
+              //SizedBox(width: 15),
               Tooltip(
                 message: '退出',
                 child: TextButton(

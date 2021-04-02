@@ -185,6 +185,18 @@ class _ControllAndShowMapForAntState extends State<ControllAndShowMapForAnt> {
                         ),
                       );
                     }, 'START'),
+                    SizedBox(height: 10),
+                    MyButton(() {
+                      _focusNodeIteration.unfocus();
+                      _focusNodeInitPathPheromone.unfocus();
+                      _focusNodeAntPheromone.unfocus();
+                      _focusNodeP.unfocus();
+                      _focusNodeB.unfocus();
+                      _focusNodeA.unfocus();
+                      _focusNodeAntsNum.unfocus();
+                      (showMapKeyForAnt.currentState as ShowMapForAntState)
+                          .reset();
+                    }, 'RESET'),
                   ],
                 ),
               ],
