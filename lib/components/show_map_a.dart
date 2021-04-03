@@ -47,6 +47,7 @@ class ShowMapForAState extends State<ShowMapForA>
 
   @override
   void dispose() {
+    _isReset = true;
     _controller.dispose();
     super.dispose();
   }

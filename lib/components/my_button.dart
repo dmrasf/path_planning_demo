@@ -40,17 +40,14 @@ class MyShowMapButton extends StatelessWidget {
       style: ButtonStyle(
         padding: MaterialStateProperty.all(EdgeInsets.all(0)),
         minimumSize: MaterialStateProperty.all(Size(200, 60)),
-        foregroundColor:
-            MaterialStateProperty.all(Colors.black.withOpacity(0.6)),
+        foregroundColor: MaterialStateProperty.all(Colors.black),
         side: MaterialStateProperty.all(BorderSide(
           color: Theme.of(context).textTheme.headline1.color.withOpacity(0.8),
           width: 2,
         )),
-        textStyle: MaterialStateProperty.all(
-          GoogleFonts.jua(
-            textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
+        textStyle: MaterialStateProperty.all(GoogleFonts.jua(
+          textStyle: TextStyle(fontSize: 15),
+        )),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_planning/components/algorithm_card.dart';
 import 'package:path_planning/components/wait_show.dart';
@@ -45,7 +46,10 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        shadowColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
+      ),
       body: _isDone
           ? Center(
               child: Column(
@@ -75,7 +79,8 @@ class _AlgorithmShowState extends State<AlgorithmShow> {
                         SizedBox(width: 30),
                         AlgorithmCard(
                             'A*', _myMap, _visualGraph, _visualPoints),
-                        SizedBox(width: 30),
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.07),
                         AlgorithmCard(
                             'Ant Colony', _myMap, _visualGraph, _visualPoints),
                         SizedBox(width: 30),

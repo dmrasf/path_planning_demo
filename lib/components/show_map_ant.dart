@@ -60,6 +60,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
 
   @override
   void dispose() {
+    _isReset = true;
     _controller.dispose();
     super.dispose();
   }
