@@ -73,7 +73,6 @@ class Map:
                     (self.__h_grid, self.__w_grid), dtype='uint8')
                 self.__my_map[self.__my_map == 0] = 255
                 self.__draw_barriers()
-                self.__fillHole()
                 self.__needExpansionGrid = math.ceil(
                     (self.__robot_size-self.__grid)/2/self.__grid)
                 if self.__needExpansionGrid < 0:
@@ -228,7 +227,7 @@ class Map:
             self.__my_map[pos_left_top[0]:pos_left_top[0]+heigth,
                           pos_left_top[1]:pos_left_top[1]+wall_heigth] = 0
             self.__my_map[pos_left_top[0]:pos_left_top[0]+wall_heigth,
-                          pos_left_top[1]+math.ceil(self.__robot_size/2/self.__grid)+wall_heigth:pos_left_top[1]+width] = 0
+                          pos_left_top[1]+wall_heigth:pos_left_top[1]+width] = 0
             pos_right_top = [pos, pos + width-wall_heigth]
             self.__my_map[pos_right_top[0]:pos_right_top[0]+heigth,
                           pos_right_top[1]:pos_right_top[1]+wall_heigth] = 0

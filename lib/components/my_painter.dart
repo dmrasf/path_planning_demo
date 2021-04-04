@@ -203,10 +203,8 @@ class MapPainter extends CustomPainter {
             Size(_wallThickness / _grid * k, heigth),
         myPaint,
       );
-      double inte = (_robotSize / 2 + _wallThickness) / _grid * k;
       canvas.drawRect(
-        leftTop + Offset(inte, 0) &
-            Size(width - inte, _wallThickness / _grid * k),
+        leftTop & Size(width, _wallThickness / _grid * k),
         myPaint,
       );
       canvas.drawRect(
