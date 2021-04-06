@@ -58,7 +58,7 @@ class _RandomMapShowState extends State<RandomMapShow> {
       widthBlock:
           _controllerWB.text.isEmpty ? 20 : int.parse(_controllerWB.text),
       heigthBlock:
-          _controllerHB.text.isEmpty ? 20 : int.parse(_controllerHB.text),
+          _controllerHB.text.isEmpty ? 13 : int.parse(_controllerHB.text),
       blankSize:
           _controllerBS.text.isEmpty ? 1.2 : double.parse(_controllerBS.text),
       wallThickness:
