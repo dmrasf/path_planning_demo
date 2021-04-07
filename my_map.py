@@ -170,6 +170,8 @@ class Map:
                 y = np.array(range(point_1_y, point_2_y+1))
             x = (y-point_1_y)/(point_2_y-point_1_y) * \
                 (point_2_x-point_1_x)+point_1_x
+        x = np.around(x)
+        y = np.around(y)
         x = x.astype(np.int32)
         y = y.astype(np.int32)
         return [x, y]
