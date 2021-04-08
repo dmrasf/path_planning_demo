@@ -170,10 +170,6 @@ class Map:
                 y = np.array(range(point_1_y, point_2_y+1))
             x = (y-point_1_y)/(point_2_y-point_1_y) * \
                 (point_2_x-point_1_x)+point_1_x
-        x = np.around(x)
-        y = np.around(y)
-        x = x.astype(np.int32)
-        y = y.astype(np.int32)
         return [x, y]
 
     def __draw_line(self, point_1_data, point_2_data):
@@ -183,9 +179,11 @@ class Map:
         point_1_x, point_1_y = self.real_to_grid(point_1)
         point_2_x, point_2_y = self.real_to_grid(point_2)
         if point_1_data['lineType'] == 'straight':
-            points = self.get_points_from_two_point_line(
+            x, y = self.get_points_from_two_point_line(
                 [point_1_x, point_1_y], [point_2_x, point_2_y])
-            self.__my_map[points[0], points[1]] = 0
+            x = x.astype(np.int32)
+            y = y.astype(np.int32)
+            self.__my_map[x, y] = 0
         elif point_1_data['lineType'] == 'curve':
             pass
         else:
@@ -238,6 +236,7 @@ class Map:
                           pos_left_bottom[1]:pos_left_bottom[1]+width] = 0
 
     def __get_contours_right_bottom_point(self, open_set, contour_order: ContourOrder):
+        """得到右下角轮廓点"""
         n = 0
         right_bottom_point = ()
         current_point = ()
@@ -252,6 +251,7 @@ class Map:
         return right_bottom_point, current_point
 
     def __get_next_contour_point(self, open_set, current_point):
+        """得到下一个连续的轮廓点"""
         if (current_point[0]+1, current_point[1]) in open_set:
             return (current_point[0]+1, current_point[1])
         if (current_point[0], current_point[1]+1) in open_set:
@@ -297,7 +297,7 @@ class Map:
             visual_points = []
             for contour in contours:
                 point_1 = 0
-                for i in range(1, len(contour)+2):
+                for i in range(1, len(contour)+5):
                     i = i % len(contour)
                     if not self.is_visible(contour[point_1], contour[i]):
                         point_1 = (i-1) % len(contour)
@@ -333,8 +333,16 @@ class Map:
 
     def is_visible(self, point_1, point_2):
         """判断在膨胀过地图上，检查两个点是否可视"""
-        points = self.get_points_from_two_point_line(point_1, point_2)
-        if np.min(self.__my_map[points[0], points[1]]) == 0:
+        x, y = self.get_points_from_two_point_line(point_1, point_2)
+        x_ceil = np.ceil(x)
+        y_ceil = np.ceil(y)
+        x_floor = np.floor(x)
+        y_floor = np.floor(y)
+        x_ceil = x_ceil.astype(int)
+        y_ceil = y_ceil.astype(int)
+        x_floor = x_floor.astype(int)
+        y_floor = y_floor.astype(int)
+        if np.min(self.__my_map[x_ceil, y_ceil]) == 0 and np.min(self.__my_map[x_floor, y_floor]) == 0:
             return False
         return True
 
