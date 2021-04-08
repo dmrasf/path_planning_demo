@@ -181,8 +181,10 @@ class Map:
         if point_1_data['lineType'] == 'straight':
             x, y = self.get_points_from_two_point_line(
                 [point_1_x, point_1_y], [point_2_x, point_2_y])
-            x = x.astype(np.int32)
-            y = y.astype(np.int32)
+            x = np.around(x)
+            y = np.around(y)
+            x = x.astype(np.int)
+            y = y.astype(np.int)
             self.__my_map[x, y] = 0
         elif point_1_data['lineType'] == 'curve':
             pass
