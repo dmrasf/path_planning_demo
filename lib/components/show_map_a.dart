@@ -187,7 +187,7 @@ class ShowMapForAState extends State<ShowMapForA>
                 2),
         0.5,
       );
-      double g = widget.visualGraph[currentPoint][p];
+      double g = _calculatePathDis(p, false);
       double f = h * hWeight + g * gWeight;
       _openPointsValue[p] = f;
       if (f < minDistance) {
