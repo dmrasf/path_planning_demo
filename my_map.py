@@ -302,9 +302,9 @@ class Map:
                 for i in range(1, len(contour)+5):
                     i = i % len(contour)
                     if not self.is_visible(contour[point_1], contour[i]):
-                        point_1 = (i-1) % len(contour)
-                        visual_points.append([int(contour[(i-1) % len(contour)][0]),
-                                              int(contour[(i-1) % len(contour)][1])])
+                        point_1 = (i-2) % len(contour)
+                        visual_points.append([int(contour[(i-2) % len(contour)][0]),
+                                              int(contour[(i-2) % len(contour)][1])])
             start_point = self.real_to_grid(self.get_start_point())
             end_point = self.real_to_grid(self.get_end_point())
             visual_points.append(end_point)

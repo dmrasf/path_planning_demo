@@ -44,7 +44,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
   bool _isShowAxis = false;
   List<double> _iterationNumValue = [];
   bool _isShowIter = false;
-  List<int> _preBest = [];
+  List<int> _preBestPath = [];
   double _preBestDistance = double.infinity;
   bool _isOp = false;
   bool _isReset = false;
@@ -158,7 +158,7 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     _controller.forward();
     _pathRoute.clear();
     _pathRouteOp.clear();
-    _preBest.clear();
+    _preBestPath.clear();
     _preBestDistance = double.infinity;
     _antsPos.clear();
     _iterationNumValue.clear();
@@ -328,43 +328,43 @@ class ShowMapForAntState extends State<ShowMapForAnt>
     for (int i = 0; i < widget.visualPoints.length - 1; i++)
       for (int j = i; j < widget.visualPoints.length; j++) {
         if (widget.visualGraph[i][j] <= 0) continue;
-        if (_pathPhermonone[i][j] > 0.1 || !_isOp)
-          _pathPhermonone[i][j] *= (1 - _p);
+
+        // 优化部分
+        if (_pathPhermonone[i][j] < 0.1 && _isOp) continue;
+
+        _pathPhermonone[i][j] *= (1 - _p);
         _pathPhermonone[j][i] = _pathPhermonone[i][j];
       }
 
+    double bestDistance = double.infinity;
+    List<int> bestPath = [];
+    for (List<int> antPath in _antsPos) {
+      if (antPath[antPath.length - 1] != -1) {
+        double distance = calculatePathDistance(
+            widget.visualGraph, antPath.sublist(0, antPath.length - 1));
+        if (bestDistance > distance) {
+          bestDistance = distance;
+          bestPath = antPath;
+        }
+      }
+    }
+    if (bestPath.isEmpty) return;
+    if (bestDistance < _preBestDistance) {
+      _preBestDistance = bestDistance;
+      _preBestPath = bestPath;
+    }
+
+    // 优化部分
     if (_isOp) {
-      // 优化部分
-      for (List<int> antPath in _antsPos) {
-        if (antPath[antPath.length - 1] != -1) {
-          double tmp = calculatePathDistance(
-              widget.visualGraph, antPath.sublist(0, antPath.length - 1));
-          if (tmp < _preBestDistance) {
-            _preBestDistance = tmp;
-            _preBest = antPath;
-          }
-        }
-      }
-      if (_preBest.isEmpty) return;
-      double deltaP = _antPheromone / _preBestDistance;
-      for (int i = 0; i < _preBest.length - 2; i++) {
-        _pathPhermonone[_preBest[i]][_preBest[i + 1]] += deltaP;
-        _pathPhermonone[_preBest[i + 1]][_preBest[i]] =
-            _pathPhermonone[_preBest[i]][_preBest[i + 1]];
-      }
-    } else {
-      for (List<int> antPath in _antsPos) {
-        if (antPath[antPath.length - 1] != -1) {
-          double distance = calculatePathDistance(
-              widget.visualGraph, antPath.sublist(0, antPath.length - 1));
-          double deltaP = _antPheromone / distance;
-          for (int i = 0; i < antPath.length - 2; i++) {
-            _pathPhermonone[antPath[i]][antPath[i + 1]] += deltaP;
-            _pathPhermonone[antPath[i + 1]][antPath[i]] =
-                _pathPhermonone[antPath[i]][antPath[i + 1]];
-          }
-        }
-      }
+      bestDistance = _preBestDistance;
+      bestPath = _preBestPath;
+    }
+
+    double deltaP = _antPheromone / bestDistance;
+    for (int i = 0; i < bestPath.length - 2; i++) {
+      _pathPhermonone[bestPath[i]][bestPath[i + 1]] += deltaP;
+      _pathPhermonone[bestPath[i + 1]][bestPath[i]] =
+          _pathPhermonone[bestPath[i]][bestPath[i + 1]];
     }
   }
 
